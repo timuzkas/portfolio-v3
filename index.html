@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>timuzkas — Portfolio</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --bg: #f5f2ec;
+                --fg: #1a1814;
+                --muted: #7a7469;
+                --accent: #c9391a;
+                --border: #d4cfc6;
+                --serif: "Instrument Serif", Georgia, serif;
+                --sans: "Instrument Sans", system-ui, sans-serif;
+                color-scheme: light dark;
+            }
+
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --bg: #111009;
+                    --fg: #e8e4dc;
+                    --muted: #8a8479;
+                    --accent: #e04e2a;
+                    --border: #2a2820;
+                }
+            }
+
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            html {
+                font-size: 18px;
+                scroll-behavior: smooth;
+            }
+
+            body {
+                background: var(--bg);
+                color: var(--fg);
+                font-family: var(--serif);
+                line-height: 1.7;
+                max-width: 680px;
+                margin: 0 auto;
+                padding: 0 1.5rem;
+                transition:
+                    background 0.3s,
+                    color 0.3s;
+            }
+
+            @keyframes fadeUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(18px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .reveal {
+                opacity: 0;
+                animation: fadeUp 0.6s ease forwards;
+            }
+
+            header {
+                padding: 4rem 0 2rem;
+                animation: fadeUp 0.6s ease forwards;
+            }
+
+            header h1 {
+                font-size: clamp(2.2rem, 6vw, 3.2rem);
+                font-weight: 400;
+                letter-spacing: -0.02em;
+                line-height: 1.1;
+            }
+
+            header h1 em {
+                font-style: italic;
+                color: var(--accent);
+            }
+
+            header p.tagline {
+                font-family: var(--sans);
+                font-size: 0.85rem;
+                color: var(--muted);
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                margin-top: 0.75rem;
+            }
+
+            nav {
+                border-top: 1px solid var(--border);
+                border-bottom: 1px solid var(--border);
+                padding: 0.6rem 0;
+                margin-bottom: 1.5rem;
+                animation: fadeUp 0.6s 0.1s ease forwards;
+                opacity: 0;
+            }
+
+            nav ul {
+                list-style: none;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.2rem 0;
+            }
+
+            nav a {
+                font-family: var(--sans);
+                font-size: 0.82rem;
+                color: var(--muted);
+                text-decoration: none;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                padding: 0.2rem 0;
+                margin-right: 1.4rem;
+                border-bottom: 1px solid transparent;
+                transition:
+                    color 0.2s,
+                    border-color 0.2s;
+            }
+
+            nav a:hover {
+                color: var(--fg);
+                border-color: var(--accent);
+            }
+
+            nav .writing-link {
+                display: none;
+            }
+
+            nav .writing-link.visible {
+                display: inline;
+            }
+
+            section {
+                margin-bottom: 4rem;
+            }
+
+            section.reveal {
+                animation-delay: 0.15s;
+            }
+            section:nth-of-type(2).reveal {
+                animation-delay: 0.25s;
+            }
+            section:nth-of-type(3).reveal {
+                animation-delay: 0.35s;
+            }
+
+            h2 {
+                font-size: 0.72rem;
+                font-family: var(--sans);
+                font-weight: 500;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: var(--muted);
+                margin-bottom: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            h2::after {
+                content: "";
+                flex: 1;
+                height: 1px;
+                background: var(--border);
+            }
+
+            p {
+                margin-bottom: 1rem;
+            }
+            p:last-child {
+                margin-bottom: 0;
+            }
+
+            #about .intro {
+                font-size: clamp(1.05rem, 2.5vw, 1.2rem);
+                line-height: 1.75;
+            }
+
+            #about .intro strong {
+                font-weight: 400;
+                font-style: italic;
+                color: var(--accent);
+            }
+
+            .skill-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.15rem 0;
+                margin-top: 1rem;
+            }
+
+            .skill {
+                font-family: var(--sans);
+                font-size: 0.78rem;
+                color: var(--muted);
+                letter-spacing: 0.03em;
+                padding: 0.15rem 0;
+                margin-right: 1.2rem;
+                border-bottom: 1px solid var(--border);
+                transition:
+                    color 0.2s,
+                    border-color 0.2s;
+            }
+
+            .skill:hover {
+                color: var(--fg);
+                border-color: var(--accent);
+            }
+
+            .project-list {
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .project {
+                padding: 1.2rem 0;
+                border-bottom: 1px solid var(--border);
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 0.5rem 1.5rem;
+                align-items: start;
+                transition: background 0.2s;
+                text-decoration: none;
+                color: inherit;
+            }
+
+            .project:first-child {
+                border-top: 1px solid var(--border);
+            }
+
+            .project:hover .proj-title {
+                color: var(--accent);
+            }
+
+            .proj-title {
+                font-size: 1.05rem;
+                transition: color 0.2s;
+                line-height: 1.3;
+            }
+
+            .proj-desc {
+                font-family: var(--sans);
+                font-size: 0.8rem;
+                color: var(--muted);
+                margin-top: 0.25rem;
+                grid-column: 1;
+            }
+
+            .proj-year {
+                font-family: var(--sans);
+                font-size: 0.78rem;
+                color: var(--muted);
+                white-space: nowrap;
+                padding-top: 0.15rem;
+            }
+
+            .proj-tag {
+                font-family: var(--sans);
+                font-size: 0.68rem;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: var(--accent);
+                margin-top: 0.3rem;
+                display: block;
+            }
+
+            .post-list {
+                display: flex;
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .post {
+                padding: 1rem 0;
+                border-bottom: 1px solid var(--border);
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                gap: 1rem;
+                text-decoration: none;
+                color: inherit;
+                transition: color 0.2s;
+            }
+
+            .post:first-child {
+                border-top: 1px solid var(--border);
+            }
+
+            .post:hover .post-title {
+                color: var(--accent);
+            }
+
+            .post-title {
+                font-size: 1rem;
+                transition: color 0.2s;
+                line-height: 1.4;
+            }
+
+            .post-date {
+                font-family: var(--sans);
+                font-size: 0.75rem;
+                color: var(--muted);
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .rss-link {
+                font-family: var(--sans);
+                font-size: 0.75rem;
+                color: var(--muted);
+                text-decoration: none;
+                letter-spacing: 0.04em;
+                margin-top: 1.2rem;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                border-bottom: 1px solid transparent;
+                transition:
+                    color 0.2s,
+                    border-color 0.2s;
+            }
+
+            .rss-link:hover {
+                color: var(--accent);
+                border-color: var(--accent);
+            }
+
+            #contact p {
+                font-size: 1.05rem;
+            }
+
+            .contact-links {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.4rem 0;
+                margin-top: 1.5rem;
+            }
+
+            .contact-links a {
+                font-family: var(--sans);
+                font-size: 0.82rem;
+                color: var(--muted);
+                text-decoration: none;
+                margin-right: 1.5rem;
+                letter-spacing: 0.04em;
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 1px;
+                transition:
+                    color 0.2s,
+                    border-color 0.2s;
+            }
+
+            .contact-links a:hover {
+                color: var(--fg);
+                border-color: var(--accent);
+            }
+
+            footer {
+                border-top: 1px solid var(--border);
+                padding: 2rem 0 3rem;
+                font-family: var(--sans);
+                font-size: 0.75rem;
+                color: var(--muted);
+                display: flex;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+
+            .scroll-reveal {
+                opacity: 0;
+                transform: translateY(14px);
+                transition:
+                    opacity 0.55s ease,
+                    transform 0.55s ease;
+            }
+
+            .scroll-reveal.in-view {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            ::selection {
+                background: var(--accent);
+                color: var(--bg);
+            }
+
+            a.inline {
+                color: inherit;
+                border-bottom: 1px solid var(--border);
+                text-decoration: none;
+                transition: border-color 0.2s;
+            }
+
+            a.inline:hover {
+                border-color: var(--accent);
+            }
+
+            .hidden {
+                display: none !important;
+            }
+
+            .expand-btn {
+                background: none;
+                border: none;
+                font-family: var(--sans);
+                font-size: 0.78rem;
+                color: var(--muted);
+                cursor: pointer;
+                margin-top: 1rem;
+                padding: 0;
+                letter-spacing: 0.04em;
+                transition: color 0.2s;
+            }
+
+            .expand-btn:hover {
+                color: var(--accent);
+            }
+
+            .expand-btn.hidden {
+                display: none;
+            }
+
+            @media (max-width: 480px) {
+                html {
+                    font-size: 16px;
+                }
+                header {
+                    padding: 2.5rem 0 1.5rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>timuzkas</h1>
+        </header>
+
+        <nav>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#writing" class="writing-link">Writing</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="about" class="scroll-reveal">
+                <h2>About</h2>
+                <div class="intro">
+                    <p>
+                        I build things across the stack.
+                        <strong
+                            >Web, backend, apps, games, and everything
+                            between.</strong
+                        >
+                    </p>
+                    <p>
+                        Most of my experience is in minecraft plugin
+                        developement and web / frontend application design, but
+                        i also made a few low-level stuff and TUI's in c++ and
+                        Go, as well as some games in python and raylib/cpp.
+                    </p>
+                </div>
+                <div class="skill-list">
+                    <span class="skill">C++</span>
+                    <span class="skill">Go</span>
+                    <span class="skill">Node.js</span>
+                    <span class="skill">Java</span>
+                    <span class="skill">Python</span>
+                    <span class="skill">Lua</span>
+                    <span class="skill">Minecraft</span>
+                    <span class="skill">Web</span>
+                    <span class="skill">Design</span>
+                </div>
+            </section>
+
+            <section id="projects" class="scroll-reveal">
+                <h2>Projects</h2>
+                <div class="project-list" id="project-list">
+                    <!-- projects injected here -->
+                </div>
+                <button id="expand-projects" class="expand-btn">
+                    Show more
+                </button>
+            </section>
+
+            <section id="writing" class="scroll-reveal hidden">
+                <h2>Writing</h2>
+                <div class="post-list" id="post-list"></div>
+                <a href="/feed.xml" class="rss-link">
+                    <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 12 12"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <circle cx="2" cy="10" r="1.5" fill="currentColor" />
+                        <path
+                            d="M1 6.5C3.985 6.5 5.5 8.015 5.5 11"
+                            stroke="currentColor"
+                            stroke-width="1.2"
+                            stroke-linecap="round"
+                            fill="none"
+                        />
+                        <path
+                            d="M1 2.5C6.247 2.5 9.5 5.753 9.5 11"
+                            stroke="currentColor"
+                            stroke-width="1.2"
+                            stroke-linecap="round"
+                            fill="none"
+                        />
+                    </svg>
+                    RSS feed
+                </a>
+            </section>
+
+            <section id="contact" class="scroll-reveal">
+                <h2>Contact</h2>
+                <p>The best way to reach me is email or Discord.</p>
+                <p>
+                    Im currently open to interesting problems, but my freetime
+                    is limited a bit limited at the moment.
+                </p>
+                <div class="contact-links">
+                    <a href="mailto:ad.humpback456@passinbox.com"
+                        >Email[alias]</a
+                    >
+                    <a
+                        href="https://github.com/timuzkas"
+                        target="_blank"
+                        rel="noopener"
+                        >GitHub</a
+                    >
+                    <a
+                        href="https://gitlab.com/timuzkas"
+                        target="_blank"
+                        rel="noopener"
+                        >GitLab</a
+                    >
+                    <a href="https://discord.com/users/timuzkas">Discord</a>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <span>© 2026 timuzkas</span>
+            <span>Built with HTML</span>
+        </footer>
+
+        <script>
+            const RSS_URL = "/feed.xml";
+
+            async function loadPosts() {
+                try {
+                    const response = await fetch(RSS_URL);
+                    if (!response.ok) throw new Error("Failed to fetch RSS");
+                    const text = await response.text();
+                    const parser = new DOMParser();
+                    const xml = parser.parseFromString(text, "application/xml");
+                    const items = xml.querySelectorAll("item");
+
+                    if (items.length === 0) {
+                        document
+                            .getElementById("writing")
+                            .classList.add("hidden");
+                        document
+                            .querySelector("nav .writing-link")
+                            .classList.add("visible");
+                        return;
+                    }
+
+                    const postList = document.getElementById("post-list");
+                    const posts = Array.from(items).slice(0, 3);
+
+                    posts.forEach((item) => {
+                        const title =
+                            item.querySelector("title")?.textContent || "";
+                        const link =
+                            item.querySelector("link")?.textContent || "#";
+                        const pubDate =
+                            item.querySelector("pubDate")?.textContent || "";
+                        const date = pubDate
+                            ? new Date(pubDate).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  year: "numeric",
+                              })
+                            : "";
+
+                        const a = document.createElement("a");
+                        a.href = link;
+                        a.className = "post";
+                        a.innerHTML = `
+                            <span class="post-title">${title}</span>
+                            <span class="post-date">${date}</span>
+                        `;
+                        postList.appendChild(a);
+                    });
+
+                    document
+                        .getElementById("writing")
+                        .classList.remove("hidden");
+                } catch {
+                    document.getElementById("writing").classList.add("hidden");
+                }
+            }
+
+            loadPosts();
+
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add("in-view");
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                },
+                { threshold: 0.08, rootMargin: "0px 0px -30px 0px" },
+            );
+
+            const projects = [
+                {
+                    title: "tbin",
+                    desc: "Fast pastebin + file sharing",
+                    tag: "Web App",
+                    year: "2025",
+                    url: "https://github.com/timuzkas/tbin",
+                },
+                {
+                    title: "semiplay",
+                    desc: "Online music client with room sync",
+                    tag: "Web App",
+                    year: "2025",
+                    url: "https://github.com/timuzkas/semiplay",
+                },
+                {
+                    title: "typero",
+                    desc: "Browser-server typing trainer",
+                    tag: "C++",
+                    year: "2025",
+                    url: "https://github.com/timuzkas/typero",
+                },
+                {
+                    title: "creapack",
+                    desc: "Package manager for CC:Tweaked",
+                    tag: "Lua",
+                    year: "2024",
+                    url: "https://github.com/monosoft/Creapack",
+                },
+                {
+                    title: "TextUI",
+                    desc: "UI framework for CC:Tweaked",
+                    tag: "Lua",
+                    year: "2024",
+                    url: "https://github.com/monosoft/MonoUI",
+                },
+                {
+                    title: "musiclo",
+                    desc: "CC:Tweaked music player with sync",
+                    tag: "Lua",
+                    year: "2024",
+                    url: "https://github.com/monosoft/musiclo",
+                },
+                {
+                    title: "pTunnel",
+                    desc: "Tunneling utility in Go",
+                    tag: "Go",
+                    year: "2024",
+                    url: "#",
+                    private: true,
+                },
+                {
+                    title: "nanorepo",
+                    desc: "Small C++ / HTML media repository",
+                    tag: "C++",
+                    year: "2025",
+                    url: "https://github.com/timuzkas/nanorepo",
+                },
+                {
+                    title: "diaro",
+                    desc: "Language learning app",
+                    tag: "TypeScript",
+                    year: "2025",
+                    url: "https://github.com/timuzkas/diara",
+                },
+                {
+                    title: "vocalo",
+                    desc: "Word-learning app in C++ + HTML",
+                    tag: "C++",
+                    year: "2025",
+                    url: "https://github.com/timuzkas/vocalo",
+                },
+                {
+                    title: "tlog",
+                    desc: "Minimal log library with tracing",
+                    tag: "C++",
+                    year: "2025",
+                    url: "https://github.com/timuzkas/tlog",
+                },
+                {
+                    title: "wldc",
+                    desc: "Discord whitelist bot for Minecraft",
+                    tag: "Java",
+                    year: "2024",
+                    url: "https://github.com/timuzkas/wldc",
+                },
+                {
+                    title: "x16-PRos",
+                    desc: "16-bit OS written in NASM from scratch",
+                    tag: "Assembly",
+                    year: "2025",
+                    url: "https://github.com/timuzkas/x16-PRos",
+                },
+            ];
+
+            const VISIBLE_COUNT = 3;
+            const projectList = document.getElementById("project-list");
+            const expandBtn = document.getElementById("expand-projects");
+
+            function renderProjects(limit) {
+                projectList.innerHTML = "";
+                projects.slice(0, limit).forEach((p) => {
+                    const a = document.createElement("a");
+                    a.href = p.url;
+                    a.className = "project";
+                    if (p.private) a.style.opacity = "0.5";
+                    a.innerHTML = `
+                        <div>
+                            <div class="proj-title">${p.title}${p.private ? " 🔒" : ""}</div>
+                            <div class="proj-desc">${p.desc}</div>
+                            <span class="proj-tag">${p.tag}</span>
+                        </div>
+                        <div class="proj-year">${p.year}</div>
+                    `;
+                    projectList.appendChild(a);
+                });
+            }
+
+            renderProjects(VISIBLE_COUNT);
+
+            if (projects.length > VISIBLE_COUNT) {
+                expandBtn.classList.remove("hidden");
+                expandBtn.addEventListener("click", () => {
+                    renderProjects(projects.length);
+                    expandBtn.classList.add("hidden");
+                });
+            }
+
+            document
+                .querySelectorAll(".scroll-reveal")
+                .forEach((el) => observer.observe(el));
+
+            const staggerParents = document.querySelectorAll(
+                ".project-list, .post-list",
+            );
+            staggerParents.forEach((parent) => {
+                const items = parent.querySelectorAll(".project, .post");
+                items.forEach((item, i) => {
+                    item.style.opacity = "0";
+                    item.style.transform = "translateY(8px)";
+                    item.style.transition = `opacity 0.4s ${0.05 * i}s ease, transform 0.4s ${0.05 * i}s ease`;
+                });
+
+                const rowObserver = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach((entry) => {
+                            if (entry.isIntersecting) {
+                                const children =
+                                    entry.target.querySelectorAll(
+                                        ".project, .post",
+                                    );
+                                children.forEach((child) => {
+                                    child.style.opacity = "1";
+                                    child.style.transform = "translateY(0)";
+                                });
+                                rowObserver.unobserve(entry.target);
+                            }
+                        });
+                    },
+                    { threshold: 0.05 },
+                );
+
+                rowObserver.observe(parent);
+            });
+        </script>
+    </body>
+</html>

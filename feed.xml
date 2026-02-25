@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+  <channel>
+    <title>timuzkas — Writing</title>
+    <link>https://timuzkas.xyz/</link>
+    <description>hey, im timuzkas, and its my blog.</description>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 25 Feb 2026 12:00:00 GMT</lastBuildDate>
+
+    <item>
+      <title>back to the beggining / Rewriting in HTML for simplicity</title>
+      <link>https://timuzkas.xyz/posts/1-rewrite</link>
+      <guid>https://timuzkas.xyz/posts/1-rewritel</guid>
+      <pubDate>Tue, 25 Feb 2026 12:00:00 GMT</pubDate>
+      <description>
+        I rebuilt my site in plain HTML to remove unnecessary complexity and reduce maintenance.
+      </description>
+    </item>
+
+  </channel>
+</rss>

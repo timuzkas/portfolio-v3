@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>~/</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style id="base-styles">
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 13px; line-height: 1.6; }
+body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100svh; padding: 20px; transition: background 0.3s; }
+body.scanlines::before { content: ""; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px); pointer-events: none; z-index: 0; }
+
+.wrap { position: relative; z-index: 1; width: 100%; max-width: 560px; display: flex; flex-direction: column; }
+.wrap > * { animation: fadeUp 0.3s ease both; }
+.wrap > *:nth-child(1) { animation-delay: 0ms; }
+.wrap > *:nth-child(2) { animation-delay: 40ms; }
+.wrap > *:nth-child(3) { animation-delay: 80ms; }
+.wrap > *:nth-child(4) { animation-delay: 110ms; }
+.wrap > *:nth-child(5) { animation-delay: 130ms; }
+.wrap > *:nth-child(6) { animation-delay: 150ms; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.clock-block { padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.time { font-size: 2.6rem; font-weight: 400; color: var(--fg); letter-spacing: -0.04em; line-height: 1; display: block; }
+.date { font-size: 0.68rem; color: var(--muted); display: block; margin-top: 2px; }
+
+.site-title { font-size: 0.8rem; color: var(--accent); padding: 10px 0; border-bottom: 1px solid var(--border); letter-spacing: 0.05em; }
+
+.search-wrap { border: 1px solid var(--border); border-top: none; background: var(--bg2); display: flex; align-items: center; position: relative; overflow: hidden; }
+.search-wrap.first { border-top: 1px solid var(--border); }
+.search-wrap::after { content: ""; position: absolute; left: 0; bottom: 0; right: 0; height: 2px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); }
+.search-wrap.focused::after { transform: scaleX(1); }
+.search-wrap.submitted { animation: submitFlash 0.32s ease; }
+@keyframes submitFlash { 0% { background: var(--bg2); } 35% { background: color-mix(in srgb, var(--accent) 15%, var(--bg2)); } 100% { background: var(--bg2); } }
+
+.search-prompt { padding: 11px 8px 11px 14px; color: var(--accent); font-family: inherit; font-size: 0.8rem; user-select: none; white-space: nowrap; }
+.search-input { flex: 1; background: transparent; border: none; outline: none; color: var(--fg); font-family: inherit; font-size: 0.8rem; padding: 11px 6px 11px 0; caret-color: var(--accent); }
+.search-input::placeholder { color: var(--dim); }
+.search-hint { padding: 0 14px; color: var(--dim); font-size: 0.68rem; white-space: nowrap; transition: color 0.2s; }
+.search-wrap.focused .search-hint { color: var(--muted); }
+
+.suggestions { border: 1px solid var(--border); border-top: none; background: var(--bg2); display: flex; flex-direction: column; max-height: 0; overflow: hidden; transition: max-height 0.2s cubic-bezier(0.4,0,0.2,1); }
+.suggestions.visible { max-height: 240px; }
+.suggestion { padding: 7px 14px; color: var(--muted); font-size: 0.75rem; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; transition: background 0.1s, color 0.1s; animation: fadeUp 0.15s ease both; }
+.suggestion:last-child { border-bottom: none; }
+.suggestion:hover, .suggestion.active { background: var(--bg); color: var(--fg); }
+.sug-icon { color: var(--dim); font-size: 0.65rem; transition: color 0.1s; }
+.suggestion:hover .sug-icon, .suggestion.active .sug-icon { color: var(--accent); }
+.sug-url { margin-left: auto; color: var(--dim); font-size: 0.65rem; }
+
+.links { border: 1px solid var(--border); border-top: none; }
+.link-item { display: flex; align-items: center; padding: 7px 14px; border-bottom: 1px solid var(--border); text-decoration: none; color: var(--muted); font-size: 0.72rem; transition: background 0.15s, color 0.15s, padding-left 0.15s; position: relative; overflow: hidden; }
+.link-item:last-child { border-bottom: none; }
+.link-item::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--accent); transform: scaleY(0); transition: transform 0.18s ease; }
+.link-item:hover { background: var(--bg2); color: var(--fg); padding-left: 18px; }
+.link-item:hover::before { transform: scaleY(1); }
+.link-key { color: var(--dim); margin-right: 10px; width: 28px; text-align: right; flex-shrink: 0; font-size: 0.65rem; transition: color 0.15s; }
+.link-item:hover .link-key { color: var(--accent); }
+.link-url { margin-left: auto; color: var(--dim); font-size: 0.65rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.footer { padding-top: 10px; display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--dim); border-top: 1px solid var(--border); }
+
+.settings-btn { position: fixed; bottom: 16px; right: 16px; background: var(--bg2); border: 1px solid var(--border); color: var(--muted); font-family: var(--font); font-size: 0.7rem; padding: 6px 10px; cursor: pointer; transition: color 0.15s, border-color 0.15s, transform 0.15s; z-index: 100; }
+.settings-btn:hover { color: var(--fg); border-color: var(--accent); transform: scale(1.05); }
+
+.overlay { display: flex; position: fixed; inset: 0; background: rgba(0,0,0,0); z-index: 200; align-items: center; justify-content: center; padding: 16px; pointer-events: none; transition: background 0.2s; }
+.overlay.open { background: rgba(0,0,0,0.75); pointer-events: all; }
+.panel { background: var(--bg2); border: 1px solid var(--border); width: 100%; max-width: 520px; max-height: 92svh; overflow-y: auto; transform: translateY(16px) scale(0.98); opacity: 0; transition: transform 0.2s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease; }
+.overlay.open .panel { transform: translateY(0) scale(1); opacity: 1; }
+
+.panel-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.8rem; color: var(--accent); position: sticky; top: 0; background: var(--bg2); z-index: 1; }
+.panel-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+.panel-tab { flex: 1; padding: 8px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); font-family: var(--font); font-size: 0.72rem; cursor: pointer; transition: color 0.15s, border-color 0.15s; }
+.panel-tab:hover { color: var(--fg); }
+.panel-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.panel-close { background: none; border: none; color: var(--muted); font-size: 1rem; cursor: pointer; font-family: inherit; padding: 0 4px; transition: color 0.15s, transform 0.15s; }
+.panel-close:hover { color: var(--fg); transform: rotate(90deg); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.panel-section { border-bottom: 1px solid var(--border); padding: 14px 16px; }
+.panel-section:last-child { border-bottom: none; }
+.section-label { font-size: 0.62rem; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.1em; }
+
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; }
+.toggle-label { font-size: 0.75rem; color: var(--fg); }
+.toggle { position: relative; width: 32px; height: 18px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; cursor: pointer; background: var(--dim); border-radius: 18px; transition: background 0.2s; }
+.toggle-slider::before { content: ""; position: absolute; width: 12px; height: 12px; left: 3px; top: 3px; background: var(--bg); border-radius: 50%; transition: transform 0.2s cubic-bezier(0.4,0,0.2,1); }
+.toggle input:checked + .toggle-slider { background: var(--accent); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(14px); }
+
+.text-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+.text-row label { font-size: 0.7rem; color: var(--muted); }
+.text-row input[type=text], .text-row select { background: var(--bg); border: 1px solid var(--border); color: var(--fg); font-family: var(--font); font-size: 0.75rem; padding: 6px 10px; outline: none; width: 100%; transition: border-color 0.15s; }
+.text-row input:focus, .text-row select:focus { border-color: var(--accent); }
+.text-row select option { background: var(--bg); }
+
+.links-editor { display: flex; flex-direction: column; gap: 6px; }
+.link-edit-header { display: grid; grid-template-columns: 48px 90px 1fr 28px; gap: 4px; margin-bottom: 2px; }
+.link-edit-header span { font-size: 0.62rem; color: var(--dim); padding: 0 2px; }
+.link-edit-row { display: grid; grid-template-columns: 48px 90px 1fr 28px; gap: 4px; align-items: center; animation: fadeUp 0.15s ease both; }
+.link-edit-row input { background: var(--bg); border: 1px solid var(--border); color: var(--fg); font-family: var(--font); font-size: 0.7rem; padding: 5px 8px; outline: none; width: 100%; transition: border-color 0.15s; }
+.link-edit-row input:focus { border-color: var(--accent); }
+.del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem; font-family: inherit; transition: color 0.15s, transform 0.15s; }
+.del-btn:hover { color: var(--accent); transform: scale(1.2); }
+.add-btn { background: none; border: 1px solid var(--border); color: var(--muted); font-family: var(--font); font-size: 0.7rem; padding: 6px; cursor: pointer; width: 100%; margin-top: 4px; transition: color 0.15s, border-color 0.15s; }
+.add-btn:hover { color: var(--fg); border-color: var(--accent); }
+
+.css-editor {
+  width: 100%; min-height: 320px; resize: vertical;
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--fg); font-family: var(--font); font-size: 0.72rem;
+  padding: 10px; outline: none; line-height: 1.7;
+  transition: border-color 0.15s;
+  tab-size: 2;
+}
+.css-editor:focus { border-color: var(--accent); }
+.css-hint { font-size: 0.65rem; color: var(--dim); margin-top: 6px; line-height: 1.5; }
+.css-hint code { color: var(--muted); }
+
+.save-btn { background: var(--accent); border: none; color: var(--bg); font-family: var(--font); font-size: 0.75rem; padding: 9px 16px; cursor: pointer; width: 100%; font-weight: 500; transition: opacity 0.15s, transform 0.1s; }
+.save-btn:hover { opacity: 0.85; }
+.save-btn:active { transform: scale(0.98); }
+.secondary-btn { background: none; border: 1px solid var(--border); color: var(--muted); font-family: var(--font); font-size: 0.7rem; padding: 6px; cursor: pointer; width: 100%; margin-top: 6px; transition: border-color 0.15s, color 0.15s; }
+.secondary-btn:hover { border-color: var(--accent); color: var(--fg); }
+
+@media (max-width: 480px) {
+  body { padding: 12px; justify-content: flex-start; padding-top: 40px; }
+  .time { font-size: 2rem; }
+  .link-url { display: none; }
+  .link-edit-row, .link-edit-header { grid-template-columns: 44px 80px 1fr 26px; }
+  .settings-btn { bottom: 10px; right: 10px; }
+}
+</style>
+<style id="user-css"></style>
+</head>
+<body>
+<div class="wrap" id="wrap"></div>
+<button class="settings-btn" id="cfg-btn">⚙ config</button>
+
+<div class="overlay" id="overlay">
+  <div class="panel">
+    <div class="panel-header">
+      <span>// config</span>
+      <button class="panel-close" id="close-btn">✕</button>
+    </div>
+    <div class="panel-tabs">
+      <button class="panel-tab active" data-tab="general">general</button>
+      <button class="panel-tab" data-tab="links">links</button>
+      <button class="panel-tab" data-tab="css">css</button>
+    </div>
+
+    <!-- general tab -->
+    <div class="tab-content active" id="tab-general">
+      <div class="panel-section">
+        <div class="section-label">MODULES</div>
+        <div class="toggle-row"><span class="toggle-label">clock</span><label class="toggle"><input type="checkbox" id="t-clock"/><span class="toggle-slider"></span></label></div>
+        <div class="toggle-row"><span class="toggle-label">quick links</span><label class="toggle"><input type="checkbox" id="t-links"/><span class="toggle-slider"></span></label></div>
+        <div class="toggle-row"><span class="toggle-label">footer</span><label class="toggle"><input type="checkbox" id="t-footer"/><span class="toggle-slider"></span></label></div>
+        <div class="toggle-row"><span class="toggle-label">scanlines</span><label class="toggle"><input type="checkbox" id="t-scanlines"/><span class="toggle-slider"></span></label></div>
+      </div>
+      <div class="panel-section">
+        <div class="section-label">GENERAL</div>
+        <div class="text-row"><label>page title</label><input type="text" id="cfg-title" placeholder="~/"/></div>
+        <div class="text-row"><label>search prompt</label><input type="text" id="cfg-prompt" placeholder="~/search ❯"/></div>
+        <div class="text-row"><label>footer text</label><input type="text" id="cfg-footer" placeholder="timuzkas"/></div>
+        <div class="text-row"><label>search engine</label>
+          <select id="cfg-engine">
+            <option value="https://search.brave.com/search?q=">Brave</option>
+            <option value="https://www.google.com/search?q=">Google</option>
+            <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+            <option value="https://search.yahoo.com/search?p=">Yahoo</option>
+            <option value="custom">Custom...</option>
+          </select>
+        </div>
+        <div class="text-row" id="custom-engine-row" style="display:none">
+          <label>custom URL (query appended)</label>
+          <input type="text" id="cfg-custom-engine" placeholder="https://example.com/search?q="/>
+        </div>
+      </div>
+      <div class="panel-section">
+        <button class="save-btn" id="save-general">save</button>
+      </div>
+    </div>
+
+    <!-- links tab -->
+    <div class="tab-content" id="tab-links">
+      <div class="panel-section">
+        <div class="link-edit-header"><span>key</span><span>label</span><span>url</span><span></span></div>
+        <div class="links-editor" id="links-editor"></div>
+        <button class="add-btn" id="add-link-btn">+ add link</button>
+      </div>
+      <div class="panel-section">
+        <button class="save-btn" id="save-links">save</button>
+      </div>
+    </div>
+
+    <!-- css tab -->
+    <div class="tab-content" id="tab-css">
+      <div class="panel-section">
+        <div class="section-label">CUSTOM CSS</div>
+        <textarea class="css-editor" id="css-editor" spellcheck="false" placeholder=":root {
+  --bg:     #0a0d0a;
+  --bg2:    #111511;
+  --border: #1a221a;
+  --fg:     #d4e0d0;
+  --muted:  #5a7055;
+  --accent: #7ab87a;
+  --dim:    #253025;
+  --font:   &quot;JetBrains Mono&quot;, monospace;
+}"></textarea>
+        <div class="css-hint">
+          use <code>:root { --accent: #ff0000; }</code> to change colors.<br/>
+          any valid css works — override classes, add new rules, change fonts, layout, anything.
+        </div>
+      </div>
+      <div class="panel-section">
+        <button class="save-btn" id="save-css">save &amp; apply</button>
+        <button class="secondary-btn" id="reset-css">reset css</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULTS = {
+  title:"~/", engine:"https://search.brave.com/search?q=",
+  customEngine:"", prompt:"~/search ❯", footer:"timuzkas",
+  showClock:false, showLinks:false, showFooter:false, showScanlines:false,
+  links:[
+    {key:"gh", label:"github",  url:"https://github.com"},
+    {key:"yt", label:"youtube", url:"https://youtube.com"},
+    {key:"rd", label:"reddit",  url:"https://reddit.com"},
+  ],
+  userCSS: `:root {
+  --bg:     #0a0d0a;
+  --bg2:    #111511;
+  --border: #1a221a;
+  --fg:     #d4e0d0;
+  --muted:  #5a7055;
+  --accent: #7ab87a;
+  --dim:    #253025;
+  --font:   "JetBrains Mono", monospace;
+}`
+};
+
+let CFG = (() => {
+  try { const s = localStorage.getItem("hp_cfg"); return s ? Object.assign({}, DEFAULTS, JSON.parse(s)) : Object.assign({}, DEFAULTS); }
+  catch { return Object.assign({}, DEFAULTS); }
+})();
+
+function saveCfg() { localStorage.setItem("hp_cfg", JSON.stringify(CFG)); }
+
+function applyCSS() {
+  document.getElementById("user-css").textContent = CFG.userCSS || "";
+  document.body.classList.toggle("scanlines", CFG.showScanlines);
+  document.title = CFG.title;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function render() {
+  applyCSS();
+  const wrap = document.getElementById("wrap");
+  wrap.innerHTML = "";
+
+  if (CFG.showClock) {
+    const cb = document.createElement("div");
+    cb.className = "clock-block";
+    cb.innerHTML = `<span class="time" id="clk-time">00:00</span><span class="date" id="clk-date"></span>`;
+    wrap.appendChild(cb);
+  }
+
+  const titleEl = document.createElement("div");
+  titleEl.className = "site-title";
+  titleEl.textContent = CFG.title;
+  wrap.appendChild(titleEl);
+
+  const sw = document.createElement("div");
+  sw.className = "search-wrap" + (!CFG.showClock ? " first" : "");
+  sw.id = "s-wrap";
+  sw.innerHTML = `<span class="search-prompt">${esc(CFG.prompt)}&nbsp;</span><input class="search-input" id="s-input" type="text" placeholder="query..." autocomplete="off" autofocus spellcheck="false"/><span class="search-hint">↵</span>`;
+  wrap.appendChild(sw);
+
+  const sb = document.createElement("div");
+  sb.className = "suggestions"; sb.id = "s-sugs";
+  wrap.appendChild(sb);
+
+  if (CFG.showLinks && CFG.links.length) {
+    const le = document.createElement("div");
+    le.className = "links";
+    CFG.links.forEach(l => {
+      const a = document.createElement("a");
+      a.className = "link-item"; a.href = l.url;
+      a.innerHTML = `<span class="link-key">${esc(l.key)}</span><span>${esc(l.label)}</span><span class="link-url">${esc(l.url.replace(/^https?:\/\//,""))}</span>`;
+      le.appendChild(a);
+    });
+    wrap.appendChild(le);
+  }
+
+  if (CFG.showFooter) {
+    const ft = document.createElement("div");
+    ft.className = "footer";
+    ft.innerHTML = `<span>// newtab</span><span>${esc(CFG.footer)}</span>`;
+    wrap.appendChild(ft);
+  }
+
+  initSearch();
+  if (CFG.showClock) initClock();
+  setTimeout(() => { const s = document.getElementById("s-input"); if(s) s.focus(); }, 30);
+}
+
+function initClock() {
+  function tick() {
+    const n = new Date(), p = v => String(v).padStart(2,"0");
+    const t = document.getElementById("clk-time"), d = document.getElementById("clk-date");
+    if (!t) return;
+    t.textContent = `${p(n.getHours())}:${p(n.getMinutes())}`;
+    const D=["sun","mon","tue","wed","thu","fri","sat"];
+    const M=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+    if(d) d.textContent = `${D[n.getDay()]}  ${n.getDate()} ${M[n.getMonth()]} ${n.getFullYear()}`;
+  }
+  tick(); setInterval(tick, 10000);
+}
+
+function getEngineUrl() {
+  return CFG.engine === "custom" ? (CFG.customEngine || "https://www.google.com/search?q=") : CFG.engine;
+}
+
+function submitSearch(url) {
+  const sw = document.getElementById("s-wrap");
+  if (!sw) { location.href = url; return; }
+  sw.classList.add("submitted");
+  setTimeout(() => { location.href = url; }, 280);
+}
+
+function initSearch() {
+  const input  = document.getElementById("s-input");
+  const sugBox = document.getElementById("s-sugs");
+  const sw     = document.getElementById("s-wrap");
+  if (!input) return;
+  let sel = -1, sugs = [];
+
+  input.addEventListener("focus",  () => sw && sw.classList.add("focused"));
+  input.addEventListener("blur",   () => sw && sw.classList.remove("focused"));
+
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    sel = -1; sugs = []; sugBox.innerHTML = ""; sugBox.classList.remove("visible");
+    if (!q || !CFG.showLinks) return;
+    sugs = CFG.links.filter(l =>
+      l.label.toLowerCase().includes(q) || l.key.toLowerCase().includes(q) || l.url.toLowerCase().includes(q)
+    ).slice(0,5);
+    if (!sugs.length) return;
+    sugBox.classList.add("visible");
+    sugs.forEach((l, idx) => {
+      const d = document.createElement("div");
+      d.className = "suggestion";
+      d.style.animationDelay = (idx * 30) + "ms";
+      d.innerHTML = `<span class="sug-icon">→</span><span>${esc(l.label)}</span><span class="sug-url">${esc(l.url.replace(/^https?:\/\//,""))}</span>`;
+      d.addEventListener("mousedown", e => { e.preventDefault(); submitSearch(l.url); });
+      sugBox.appendChild(d);
+    });
+  });
+
+  input.addEventListener("keydown", e => {
+    const items = sugBox.querySelectorAll(".suggestion");
+    if (e.key === "ArrowDown") {
+      e.preventDefault(); sel = Math.min(sel+1, items.length-1);
+      items.forEach((el,i) => el.classList.toggle("active", i===sel));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault(); sel = Math.max(sel-1, -1);
+      items.forEach((el,i) => el.classList.toggle("active", i===sel));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (sel >= 0 && sugs[sel]) { submitSearch(sugs[sel].url); return; }
+      const q = input.value.trim();
+      if (!q) return;
+      let url;
+      if (/^https?:\/\//.test(q)) url = q;
+      else if (/^[\w-]+\.[\w.-]+$/.test(q)) url = "https://"+q;
+      else url = getEngineUrl() + encodeURIComponent(q);
+      submitSearch(url);
+    } else if (e.key === "Escape") {
+      input.value=""; sugs=[]; sugBox.innerHTML=""; sugBox.classList.remove("visible"); sel=-1;
+    }
+  });
+}
+
+// tabs
+document.querySelectorAll(".panel-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".panel-tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById("tab-" + tab.dataset.tab).classList.add("active");
+  });
+});
+
+function openSettings() {
+  document.getElementById("t-clock").checked     = CFG.showClock;
+  document.getElementById("t-links").checked     = CFG.showLinks;
+  document.getElementById("t-footer").checked    = CFG.showFooter;
+  document.getElementById("t-scanlines").checked = CFG.showScanlines;
+  document.getElementById("cfg-title").value     = CFG.title;
+  document.getElementById("cfg-prompt").value    = CFG.prompt;
+  document.getElementById("cfg-footer").value    = CFG.footer;
+  document.getElementById("cfg-custom-engine").value = CFG.customEngine || "";
+  const engSel = document.getElementById("cfg-engine");
+  const known = Array.from(engSel.options).map(o => o.value).filter(v => v !== "custom");
+  engSel.value = known.includes(CFG.engine) ? CFG.engine : "custom";
+  toggleCustomEngine();
+  document.getElementById("css-editor").value = CFG.userCSS || DEFAULTS.userCSS;
+  renderLinksEditor();
+  document.getElementById("overlay").classList.add("open");
+}
+
+function closeSettings() { document.getElementById("overlay").classList.remove("open"); }
+
+function toggleCustomEngine() {
+  document.getElementById("custom-engine-row").style.display =
+    document.getElementById("cfg-engine").value === "custom" ? "flex" : "none";
+}
+
+function renderLinksEditor() {
+  const ed = document.getElementById("links-editor");
+  ed.innerHTML = "";
+  CFG.links.forEach((l, i) => {
+    const row = document.createElement("div");
+    row.className = "link-edit-row";
+    row.innerHTML = `
+      <input type="text" placeholder="key"   value="${esc(l.key)}"   data-f="key"/>
+      <input type="text" placeholder="label" value="${esc(l.label)}" data-f="label"/>
+      <input type="text" placeholder="https://..." value="${esc(l.url)}" data-f="url"/>
+      <button class="del-btn" data-i="${i}">✕</button>`;
+    ed.appendChild(row);
+  });
+  ed.querySelectorAll(".del-btn").forEach(btn => {
+    btn.addEventListener("click", () => { CFG.links.splice(+btn.dataset.i, 1); renderLinksEditor(); });
+  });
+}
+
+function collectLinks() {
+  CFG.links = Array.from(document.querySelectorAll("#links-editor .link-edit-row")).map(row => ({
+    key:   row.querySelector("[data-f='key']").value.trim(),
+    label: row.querySelector("[data-f='label']").value.trim(),
+    url:   row.querySelector("[data-f='url']").value.trim(),
+  })).filter(l => l.url);
+}
+
+document.getElementById("cfg-btn").addEventListener("click", openSettings);
+document.getElementById("close-btn").addEventListener("click", closeSettings);
+document.getElementById("overlay").addEventListener("click", e => { if(e.target === document.getElementById("overlay")) closeSettings(); });
+document.getElementById("cfg-engine").addEventListener("change", toggleCustomEngine);
+document.getElementById("add-link-btn").addEventListener("click", () => { CFG.links.push({key:"",label:"",url:""}); renderLinksEditor(); });
+
+document.getElementById("save-general").addEventListener("click", () => {
+  CFG.showClock    = document.getElementById("t-clock").checked;
+  CFG.showLinks    = document.getElementById("t-links").checked;
+  CFG.showFooter   = document.getElementById("t-footer").checked;
+  CFG.showScanlines= document.getElementById("t-scanlines").checked;
+  CFG.title        = document.getElementById("cfg-title").value   || DEFAULTS.title;
+  CFG.prompt       = document.getElementById("cfg-prompt").value  || DEFAULTS.prompt;
+  CFG.footer       = document.getElementById("cfg-footer").value  || DEFAULTS.footer;
+  CFG.engine       = document.getElementById("cfg-engine").value;
+  CFG.customEngine = document.getElementById("cfg-custom-engine").value.trim();
+  saveCfg(); closeSettings(); render();
+});
+
+document.getElementById("save-links").addEventListener("click", () => {
+  collectLinks(); saveCfg(); closeSettings(); render();
+});
+
+document.getElementById("save-css").addEventListener("click", () => {
+  CFG.userCSS = document.getElementById("css-editor").value;
+  saveCfg(); closeSettings(); render();
+});
+
+document.getElementById("reset-css").addEventListener("click", () => {
+  document.getElementById("css-editor").value = DEFAULTS.userCSS;
+});
+
+// tab key in css editor inserts spaces instead of changing focus
+document.getElementById("css-editor").addEventListener("keydown", e => {
+  if (e.key === "Tab") {
+    e.preventDefault();
+    const t = e.target, s = t.selectionStart, end = t.selectionEnd;
+    t.value = t.value.substring(0, s) + "  " + t.value.substring(end);
+    t.selectionStart = t.selectionEnd = s + 2;
+  }
+});
+
+render();
+</script>
+</body>
+</html>

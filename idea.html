@@ -1,725 +1,547 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Draw Something Real</title>
-<style>
-  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap");
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Draw Something Real</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-  *,
-  *::before,
-  *::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+      :root {
+        --bg: #0a0a0a;
+        --fg: #f2f2f2;
+        --dim: #737373;
+        --border: rgba(255, 255, 255, 0.1);
+        --accent: #a3a3a3;
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      }
 
-  :root {
-    --bg: #0b0b0b;
-    --fg: #e8e6e0;
-    --dim: #555;
-    --border: #1e1e1e;
-    --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  }
+      [data-theme="light"] {
+        --bg: #f5f5f5;
+        --fg: #1a1a1a;
+        --dim: #888888;
+        --border: rgba(0, 0, 0, 0.1);
+      }
 
-  [data-theme="light"] {
-    --bg: #f2f0eb;
-    --fg: #111;
-    --dim: #999;
-    --border: #ddd;
-  }
+      html {
+        font-size: 16px;
+      }
 
-  html { font-size: 16px; }
+      body {
+        font-family: 'Syne', sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition:
+          background 0.8s var(--ease),
+          color 0.8s var(--ease);
+        overflow-x: hidden;
+      }
 
-  body {
-    font-family: "Inter", sans-serif;
-    background: var(--bg);
-    color: var(--fg);
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: background 0.8s var(--ease), color 0.8s var(--ease);
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
-  }
+      .container {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 800px;
+        padding: 0 24px;
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+      }
 
-  /* --- ambient glow --- */
-  .glow {
-    position: fixed;
-    width: 50vmax;
-    height: 50vmax;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--fg), transparent 70%);
-    opacity: 0.018;
-    top: 50%;
-    left: 50%;
-    translate: -50% -50%;
-    pointer-events: none;
-    transition: opacity 1.5s ease;
-    animation: breathe 10s ease-in-out infinite;
-  }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 40px 0;
+      }
 
-  [data-theme="light"] .glow { opacity: 0.03; }
+      .logo {
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        text-transform: lowercase;
+      }
 
-  @keyframes breathe {
-    0%, 100% { scale: 1; }
-    50% { scale: 1.15; }
-  }
+      .theme-btn {
+        background: none;
+        border: none;
+        color: var(--dim);
+        cursor: pointer;
+        font-size: 0.75rem;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
 
-  .container {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 680px;
-    padding: 0 24px;
-    display: flex;
-    flex-direction: column;
-    min-height: 100dvh;
-  }
+      .theme-btn:hover {
+        color: var(--fg);
+      }
 
-  /* --- header --- */
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 32px 0 0;
-  }
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 64px;
+        padding-bottom: 80px;
+      }
 
-  .logo {
-    font-size: 0.65rem;
-    font-weight: 400;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dim);
-    transition: color 0.8s var(--ease);
-  }
+      .categories {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-start;
+      }
 
-  .theme-btn {
-    background: none;
-    border: none;
-    color: var(--dim);
-    cursor: pointer;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-family: "Inter", sans-serif;
-    padding: 8px 0;
-    transition: color 0.4s ease;
-  }
+      .cat {
+        background: none;
+        border: 1px solid var(--border);
+        color: var(--dim);
+        font-family: 'Syne', sans-serif;
+        font-size: 0.7rem;
+        font-weight: 500;
+        padding: 6px 14px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: all 0.3s var(--ease);
+      }
 
-  .theme-btn:hover { color: var(--fg); }
+      .cat:hover {
+        border-color: var(--dim);
+        color: var(--fg);
+      }
 
-  /* --- main --- */
-  main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 80px 0;
-    gap: 56px;
-    text-align: center;
-  }
+      .cat.active {
+        background: var(--fg);
+        color: var(--bg);
+        border-color: var(--fg);
+      }
 
-  /* --- categories --- */
-  .categories {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    justify-content: center;
-  }
+      .idea-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
 
-  .cat {
-    background: none;
-    border: none;
-    color: var(--dim);
-    font-family: "Inter", sans-serif;
-    font-size: 0.72rem;
-    font-weight: 400;
-    padding: 6px 14px;
-    cursor: pointer;
-    border-radius: 100px;
-    transition: color 0.4s ease, opacity 0.4s ease;
-    letter-spacing: 0.01em;
-  }
+      .idea-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--dim);
+        text-transform: lowercase;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.6s var(--ease);
+      }
 
-  .cat:hover { color: var(--fg); }
+      .idea-label.visible {
+        opacity: 1;
+        transform: none;
+      }
 
-  .cat.active {
-    color: var(--fg);
-    background: var(--border);
-    transition: all 0.5s var(--ease);
-  }
+      .idea-text {
+        font-size: clamp(2rem, 6vw, 3.5rem);
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.04em;
+        min-height: 3em;
+      }
 
-  /* --- idea --- */
-  .idea-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 24px;
-    max-width: 600px;
-  }
+      .idea-text .placeholder {
+        font-weight: 400;
+        color: var(--dim);
+      }
 
-  .idea-label {
-    font-size: 0.6rem;
-    font-weight: 400;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--dim);
-    opacity: 0;
-    transform: translateY(-6px);
-    transition: all 0.6s var(--ease);
-  }
+      .idea-text .word {
+        display: inline-block;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: wordUp 0.6s var(--ease) forwards;
+      }
 
-  .idea-label.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+      @keyframes wordUp {
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
 
-  .idea-text {
-    font-family: "Instrument Serif", serif;
-    font-weight: 400;
-    font-size: clamp(1.8rem, 5.5vw, 3.2rem);
-    line-height: 1.2;
-    letter-spacing: -0.01em;
-    min-height: 2.8em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
+      .idea-hint {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--dim);
+        line-height: 1.4;
+        max-width: 500px;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.8s var(--ease) 0.2s;
+      }
 
-  .idea-text .placeholder {
-    font-family: "Inter", sans-serif;
-    font-size: 0.85rem;
-    font-weight: 300;
-    color: var(--dim);
-    letter-spacing: 0.02em;
-  }
+      .idea-hint.visible {
+        opacity: 1;
+        transform: none;
+      }
 
-  .idea-text .word {
-    display: inline-block;
-    opacity: 0;
-    transform: translateY(20px);
-    animation: wordUp 0.55s var(--ease) forwards;
-  }
+      .diff {
+        display: flex;
+        gap: 6px;
+        opacity: 0;
+        transition: opacity 0.6s ease 0.4s;
+      }
 
-  @keyframes wordUp {
-    to { opacity: 1; transform: translateY(0); }
-  }
+      .diff.visible {
+        opacity: 1;
+      }
 
-  .idea-hint {
-    font-size: 0.8rem;
-    font-weight: 300;
-    color: var(--dim);
-    line-height: 1.65;
-    max-width: 440px;
-    opacity: 0;
-    transform: translateY(8px);
-    transition: all 0.7s var(--ease) 0.3s;
-  }
+      .diff-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--border);
+        transition: all 0.4s var(--ease);
+      }
 
-  .idea-hint.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+      .diff-dot.on {
+        background: var(--fg);
+        transform: scale(1.2);
+      }
 
-  /* --- difficulty --- */
-  .diff {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    opacity: 0;
-    transition: opacity 0.6s ease 0.4s;
-  }
+      .gen-btn {
+        background: none;
+        border: none;
+        color: var(--fg);
+        font-family: 'Syne', sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        cursor: pointer;
+        padding: 20px 0;
+        text-align: left;
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        transition: gap 0.4s var(--ease);
+        width: fit-content;
+      }
 
-  .diff.visible { opacity: 1; }
+      .gen-btn::after {
+        content: '→';
+        transition: transform 0.4s var(--ease);
+      }
 
-  .diff-dot {
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--border);
-    transition: background 0.5s var(--ease), transform 0.5s var(--ease);
-  }
+      .gen-btn:hover {
+        gap: 1.5rem;
+      }
 
-  .diff-dot.on {
-    background: var(--dim);
-    transform: scale(1.3);
-  }
+      .hist-btn {
+        position: fixed;
+        bottom: 40px;
+        right: 40px;
+        background: none;
+        border: none;
+        color: var(--dim);
+        font-family: 'Syne', sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: color 0.3s ease;
+      }
 
-  /* --- generate --- */
-  .gen-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-  }
+      .hist-btn:hover {
+        color: var(--fg);
+      }
 
-  .gen-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--fg);
-    font-family: "Inter", sans-serif;
-    font-size: 0.78rem;
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    padding: 14px 40px;
-    border-radius: 100px;
-    cursor: pointer;
-    transition: all 0.5s var(--ease);
-    position: relative;
-  }
+      .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 15;
+        background: var(--bg);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s var(--ease);
+      }
 
-  .gen-btn:hover {
-    border-color: var(--fg);
-    padding: 14px 52px;
-  }
+      .overlay.open {
+        opacity: 0.95;
+        pointer-events: auto;
+      }
 
-  .gen-btn:active {
-    scale: 0.96;
-    transition-duration: 0.1s;
-  }
+      .hist-panel {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        padding: 8vw 5vw;
+        transform: translateY(20px);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.6s var(--ease);
+        overflow-y: auto;
+      }
 
-  .gen-shortcut {
-    font-size: 0.6rem;
-    color: var(--dim);
-    letter-spacing: 0.06em;
-    opacity: 0.6;
-    transition: color 0.8s var(--ease);
-  }
+      .hist-panel.open {
+        opacity: 1;
+        transform: none;
+        pointer-events: auto;
+      }
 
-  /* --- history --- */
-  .hist-btn {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: none;
-    border: none;
-    color: var(--dim);
-    font-family: "Inter", sans-serif;
-    font-size: 0.6rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    padding: 10px;
-    transition: color 0.3s ease;
-    z-index: 10;
-  }
+      .hist-inner {
+        max-width: 800px;
+        margin: 0 auto;
+      }
 
-  .hist-btn:hover { color: var(--fg); }
+      .hist-head {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 48px;
+      }
 
-  .overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 15;
-    background: var(--bg);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.6s var(--ease);
-  }
+      .hist-title {
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+      }
 
-  .overlay.open { opacity: 0.85; pointer-events: auto; }
+      .hist-close {
+        background: none;
+        border: none;
+        color: var(--fg);
+        cursor: pointer;
+        font-size: 1.5rem;
+      }
 
-  .hist-panel {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 20;
-    background: var(--bg);
-    border-top: 1px solid var(--border);
-    padding: 32px 24px 40px;
-    transform: translateY(100%);
-    transition: transform 0.7s var(--ease), background 0.8s var(--ease), border-color 0.8s var(--ease);
-    max-height: 50dvh;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+      .hist-item {
+        padding: 24px 0;
+        border-bottom: 1px solid var(--border);
+      }
 
-  .hist-panel.open { transform: translateY(0); }
+      .hist-item .hist-cat {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--dim);
+        display: block;
+        margin-bottom: 8px;
+      }
 
-  .hist-inner {
-    width: 100%;
-    max-width: 500px;
-  }
+      .hist-item-text {
+        font-size: 1.25rem;
+        font-weight: 500;
+        line-height: 1.3;
+      }
 
-  .hist-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-  }
+      footer {
+        padding: 40px 0;
+        font-size: 0.75rem;
+        color: var(--dim);
+      }
 
-  .hist-title {
-    font-size: 0.6rem;
-    font-weight: 400;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--dim);
-  }
+      @media (max-width: 600px) {
+        main {
+          gap: 48px;
+        }
+        .hist-btn {
+          bottom: 24px;
+          right: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="logo">draw something real</div>
+        <button class="theme-btn" id="themeBtn">light</button>
+      </header>
 
-  .hist-close {
-    background: none;
-    border: none;
-    color: var(--dim);
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: color 0.3s ease;
-  }
+      <main>
+        <div class="categories" id="cats"></div>
 
-  .hist-close:hover { color: var(--fg); }
-
-  .hist-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .hist-item {
-    font-family: "Instrument Serif", serif;
-    font-size: 1rem;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-    opacity: 0;
-    transform: translateY(8px);
-    animation: fadeUp 0.4s var(--ease) forwards;
-    cursor: default;
-  }
-
-  .hist-item .hist-cat {
-    font-family: "Inter", sans-serif;
-    font-size: 0.55rem;
-    font-weight: 400;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--dim);
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .hist-empty {
-    color: var(--dim);
-    font-size: 0.78rem;
-    font-weight: 300;
-    font-style: italic;
-  }
-
-  @keyframes fadeUp {
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* --- line --- */
-  .line {
-    width: 32px;
-    height: 1px;
-    background: var(--border);
-    transition: background 0.8s var(--ease);
-  }
-
-  /* --- footer --- */
-  footer {
-    text-align: center;
-    padding: 0 0 32px;
-    font-size: 0.6rem;
-    color: var(--dim);
-    letter-spacing: 0.04em;
-    font-weight: 300;
-    transition: color 0.8s var(--ease);
-  }
-
-  @media (max-width: 500px) {
-    main { padding: 60px 0; gap: 44px; }
-    .gen-shortcut { display: none; }
-  }
-</style>
-</head>
-<body>
-  <div class="glow"></div>
-
-  <div class="container">
-    <header>
-      <div class="logo">Draw something real</div>
-      <button class="theme-btn" id="themeBtn">Light</button>
-    </header>
-
-    <main>
-      <div class="categories" id="cats"></div>
-
-      <div class="idea-wrap">
-        <div class="idea-label" id="label"></div>
-        <div class="idea-text" id="idea">
-          <span class="placeholder">press generate, or spacebar</span>
+        <div class="idea-wrap">
+          <div class="idea-label" id="label">category</div>
+          <div class="idea-text" id="idea">
+            <span class="placeholder">press generate or space</span>
+          </div>
+          <div class="idea-hint" id="hint"></div>
+          <div class="diff" id="diff">
+            <div class="diff-dot"></div>
+            <div class="diff-dot"></div>
+            <div class="diff-dot"></div>
+            <div class="diff-dot"></div>
+            <div class="diff-dot"></div>
+          </div>
         </div>
-        <div class="idea-hint" id="hint"></div>
-        <div class="diff" id="diff">
-          <div class="diff-dot"></div>
-          <div class="diff-dot"></div>
-          <div class="diff-dot"></div>
-          <div class="diff-dot"></div>
-          <div class="diff-dot"></div>
+
+        <div class="gen-wrap">
+          <button class="gen-btn" id="genBtn">Generate idea</button>
         </div>
-      </div>
+      </main>
 
-      <div class="gen-wrap">
-        <button class="gen-btn" id="genBtn">Generate</button>
-        <span class="gen-shortcut">spacebar</span>
-      </div>
-    </main>
+      <footer>© 2026 // for the artists</footer>
+    </div>
 
-    <footer>for people who actually draw</footer>
-  </div>
-
-  <button class="hist-btn" id="histBtn">History · <span id="histNum">0</span></button>
-  <div class="overlay" id="overlay"></div>
-  <div class="hist-panel" id="histPanel">
-    <div class="hist-inner">
-      <div class="hist-head">
-        <span class="hist-title">Recent</span>
-        <button class="hist-close" id="histClose">✕</button>
-      </div>
-      <div class="hist-list" id="histList">
-        <div class="hist-empty">Nothing yet</div>
+    <button class="hist-btn" id="histBtn">
+      history (<span id="histNum">0</span>)
+    </button>
+    <div class="overlay" id="overlay"></div>
+    <div class="hist-panel" id="histPanel">
+      <div class="hist-inner">
+        <div class="hist-head">
+          <span class="hist-title">recent ideas</span>
+          <button class="hist-close" id="histClose">✕</button>
+        </div>
+        <div class="hist-list" id="histList"></div>
       </div>
     </div>
-  </div>
 
-<script>
-const IDEAS = {
-  "Everyday Life": [
-    { text: "Your morning coffee, half-finished, from directly above", hint: "Focus on the ring stain, the shadow, the liquid surface. Make the mundane feel monumental.", difficulty: 2 },
-    { text: "The view from your window at the exact hour you hate most", hint: "Capture the light honestly. What makes that hour feel heavy or dull?", difficulty: 2 },
-    { text: "Someone sleeping on public transport", hint: "The vulnerability, the awkward angle of the neck. Keep it tender, not creepy.", difficulty: 3 },
-    { text: "Your hand holding something you use every single day", hint: "A phone, a pen, a mug. Study how your fingers actually grip—not how you think they do.", difficulty: 2 },
-    { text: "A kitchen counter after cooking a real meal", hint: "The chaos: peels, oil splatters, a knife resting wrong. Tell the story of the meal.", difficulty: 3 },
-    { text: "Your shoes, worn down and honest", hint: "Draw every scuff, every crease. These are a portrait of how you move.", difficulty: 2 },
-    { text: "The inside of your fridge, right now, no staging", hint: "Half-empty containers, that one thing in the back. Ugly honesty makes great drawings.", difficulty: 3 },
-    { text: "A pile of unfolded laundry on a chair", hint: "Cloth folds are deceptively hard. Let the fabric feel heavy and soft.", difficulty: 3 },
-    { text: "Your desk at its messiest", hint: "Every sticky note, cable, half-open drawer. Chaos has rhythm—find it.", difficulty: 4 },
-    { text: "Someone's hands while they explain something", hint: "Gesture is everything. The hands are mid-thought, mid-air, full of meaning.", difficulty: 4 },
-    { text: "Your unmade bed from a low angle", hint: "Dramatic lighting helps. Make the wrinkles in the sheets feel like landscape.", difficulty: 2 },
-    { text: "A single plate of food you actually eat, not a fantasy feast", hint: "Toast and eggs > imaginary banquet. Draw what you know.", difficulty: 2 },
-  ],
-  "People & Faces": [
-    { text: "A face drawn entirely from memory of someone you saw today", hint: "You'll get things wrong—that's the point. Memory distorts beautifully.", difficulty: 3 },
-    { text: "Self-portrait using only your non-dominant hand", hint: "Let go of perfection. The shakiness adds character you can't fake.", difficulty: 2 },
-    { text: "The back of someone's head and what it says about them", hint: "Posture, hair, the set of the shoulders. Portraits don't need faces.", difficulty: 3 },
-    { text: "An elderly person's hands in detail", hint: "Every vein, wrinkle, and age spot is a line of their story. Take your time.", difficulty: 5 },
-    { text: "A child mid-laugh—not posed, mid-explosion of joy", hint: "Scrunched eyes, open mouth, the whole face pulled upward. Energy over accuracy.", difficulty: 4 },
-    { text: "Someone concentrating so hard they forgot their face is doing a thing", hint: "Tongue out, squinting, furrowed brow. The unselfconscious face.", difficulty: 3 },
-    { text: "Your own face at 80—imagine it honestly", hint: "Where will the lines fall? What will gravity do? Be kind but real.", difficulty: 4 },
-    { text: "Two people sitting together but not talking", hint: "The space between people says more than conversation. Draw the silence.", difficulty: 4 },
-    { text: "A person viewed through rain-streaked glass", hint: "Distortion, streaks, blurred edges. The figure is a suggestion.", difficulty: 4 },
-    { text: "Someone from behind, walking away down a long corridor", hint: "Perspective, atmosphere, and the loneliness of a single figure. Less is more.", difficulty: 3 },
-  ],
-  "Nature & Organic": [
-    { text: "A single tree you pass every day, drawn like it's the first time you noticed it", hint: "Actually look at how the branches split. No lollipop trees—real structure.", difficulty: 3 },
-    { text: "A puddle reflecting something more interesting than itself", hint: "The puddle is a window. What world does it show?", difficulty: 3 },
-    { text: "A piece of fruit rotting—not disgusting, just honest about time", hint: "The texture shift where firm becomes soft. Decay has incredible detail.", difficulty: 4 },
-    { text: "Weeds growing through a crack in concrete", hint: "The tension between hard and soft, built and grown. Tiny and epic.", difficulty: 3 },
-    { text: "The exact same plant drawn at three different times of day", hint: "Same composition, different light. See how shadows reshape form.", difficulty: 4 },
-    { text: "A rock. Just a rock. But make someone care about it.", hint: "Weight, texture, the way light falls on a simple form. This is harder than it sounds.", difficulty: 3 },
-    { text: "An animal sleeping in a position that looks uncomfortable but clearly isn't", hint: "Cats in boxes, dogs twisted on couches. Relaxed anatomy is weird anatomy.", difficulty: 3 },
-    { text: "Storm clouds building, minutes before rain", hint: "The heaviness. The bruised purple-grey. The tension in the sky.", difficulty: 4 },
-    { text: "A fallen leaf with every vein visible", hint: "Slow down. Trace every branching line. Patience is the skill here.", difficulty: 4 },
-    { text: "Roots of a tree exposed by erosion", hint: "The secret underground architecture, suddenly visible. Draw what's usually hidden.", difficulty: 4 },
-  ],
-  "Objects & Still Life": [
-    { text: "An old tool that belongs to someone you respect", hint: "The wear patterns tell you how it was held. Draw the history in the handle.", difficulty: 3 },
-    { text: "Three transparent objects overlapping", hint: "Glass, water, plastic—whatever. The challenge is where one ends and another begins.", difficulty: 5 },
-    { text: "A crumpled piece of paper, lit from one side", hint: "Pure study of planes and shadow. Simple subject, complex light.", difficulty: 3 },
-    { text: "Keys on a ring—your keys, specifically", hint: "Each one is a different place you're allowed to enter. Draw them like they matter.", difficulty: 3 },
-    { text: "Something you own that you'd grab in a fire", hint: "What is it and why? Let that answer guide how you draw it.", difficulty: 2 },
-    { text: "A jar of something with a handwritten label", hint: "The jar's transparency, the contents, the imperfect lettering. Layers of detail.", difficulty: 4 },
-    { text: "A musical instrument from an angle nobody photographs it", hint: "The underside of a guitar, inside a piano, the back of a drum. Find the hidden view.", difficulty: 4 },
-    { text: "Tangled earphones or cables", hint: "Pure line work puzzle. Follow each strand through the mess. Meditative and maddening.", difficulty: 4 },
-    { text: "An object drawn at 5x its actual size", hint: "When you scale up the mundane, every detail becomes a landscape.", difficulty: 3 },
-    { text: "A single match—before, lit, and after—in one composition", hint: "Three states of the same object. Time collapsed onto one page.", difficulty: 3 },
-  ],
-  "Spaces & Places": [
-    { text: "A room you remember from childhood, from memory", hint: "Don't reference photos. Let your memory fill in and distort. That distortion is interesting.", difficulty: 3 },
-    { text: "A staircase that makes you feel something", hint: "Going up? Going down? Is it inviting or ominous? Architecture has mood.", difficulty: 3 },
-    { text: "The corner of a room where two walls and the floor meet", hint: "Where dust gathers. Where light behaves strangely. The overlooked geometry.", difficulty: 2 },
-    { text: "A place you've never been but can see from where you are", hint: "Across the street, across the river. You know it only from the outside.", difficulty: 3 },
-    { text: "An alleyway at golden hour", hint: "Warm light hitting dirty walls. Beauty in unexpected places.", difficulty: 4 },
-    { text: "A shop front that's been there longer than you've been alive", hint: "The faded signage, the wear on the step, the character in the details.", difficulty: 4 },
-    { text: "The emptiest place you can get to in 10 minutes", hint: "Go there. Draw it. Emptiness has texture when you look carefully.", difficulty: 3 },
-    { text: "A bridge—focus on what's underneath it, not the postcard view", hint: "The structural bones, the shadows, the graffiti. The unglamorous angle.", difficulty: 4 },
-    { text: "A doorway with light spilling through it into a dark room", hint: "High contrast. The rectangle of light. What's in the light vs what's hiding in dark.", difficulty: 3 },
-    { text: "Your bathroom mirror, drawn from an angle that includes you drawing", hint: "Meta, but genuinely challenging. Reflections, perspective, self-awareness.", difficulty: 5 },
-  ],
-  "Conceptual": [
-    { text: "Draw a sound you heard today without using any symbols", hint: "No music notes, no speech bubbles. Translate audio into pure visual form.", difficulty: 5 },
-    { text: "The weight of something heavy—without drawing the object", hint: "Can you draw heaviness itself? The compression, the strain, the pull downward.", difficulty: 5 },
-    { text: "What 3AM feels like as a landscape", hint: "Not a clock. The actual sensation—maybe vast, maybe suffocating, maybe still.", difficulty: 4 },
-    { text: "A conversation between two textures", hint: "Rough vs smooth, organic vs geometric. Let the textures interact on the page.", difficulty: 3 },
-    { text: "The moment just before something falls", hint: "Tension. The tipping point. Everything is still but nothing is stable.", difficulty: 4 },
-    { text: "Illustrate the difference between alone and lonely", hint: "Same subject, two drawings. What changes between solitude and loneliness?", difficulty: 5 },
-    { text: "A map of everywhere you went today, but drawn from feeling not geography", hint: "Some places felt bigger, some you rushed through. Emotional cartography.", difficulty: 4 },
-    { text: "Something that looks soft but is hard, next to something that looks hard but is soft", hint: "Visual deception. Challenge the viewer's assumptions about texture.", difficulty: 4 },
-    { text: "The space an object used to occupy—draw the absence", hint: "A dent in a cushion, a clean rectangle on a dusty shelf. The ghost of a thing.", difficulty: 4 },
-    { text: "Your current mood as weather happening inside a room", hint: "Rain from the ceiling, fog at the desk, sunbeam on the bed. Internal climate.", difficulty: 4 },
-  ],
-  "Challenge Mode": [
-    { text: "Draw your entire room in under 90 seconds", hint: "Speed forces you to prioritize. What do you draw first? That reveals what matters.", difficulty: 2 },
-    { text: "A highly detailed one-square-inch drawing of any surface near you", hint: "Zoom way in. Fill a whole page with one square inch of reality.", difficulty: 5 },
-    { text: "One continuous line drawing of the most complex thing you can see", hint: "Pen never leaves paper. Plan your route. It's drawing as pathfinding.", difficulty: 4 },
-    { text: "Draw something using only shadows—no outlines at all", hint: "Build form entirely from dark shapes. See like a painter, not a drafter.", difficulty: 5 },
-    { text: "The same object drawn in 5 completely different styles on one page", hint: "Realistic, geometric, expressive, minimal, maximalist. Same subject, five voices.", difficulty: 4 },
-    { text: "Draw with your eyes closed for 60 seconds, then finish with eyes open", hint: "The blind portion creates accidents you'd never plan. Work WITH them.", difficulty: 3 },
-    { text: "Fill an entire page with only straight lines—make it feel organic", hint: "Hatching, cross-hatching, angles. Rigid marks, living result.", difficulty: 4 },
-    { text: "Draw a portrait using only dots", hint: "Pointillism. Patience incarnate. Build form from pure accumulation.", difficulty: 5 },
-    { text: "Redraw something you drew a year ago—see what changed", hint: "This is a mirror. Your growth shows in what you now notice.", difficulty: 3 },
-    { text: "Left hand draws the left half, right hand draws the right half of a face", hint: "Asymmetry guaranteed. Embrace the mismatch—it's more human than perfection.", difficulty: 4 },
-  ],
-};
+    <script>
+      const IDEAS = {
+        "Everyday Life": [
+          { text: "Your morning coffee, half-finished, from directly above", hint: "Focus on the liquid surface. Make the mundane feel monumental.", difficulty: 2 },
+          { text: "The view from your window at the hour you hate most", hint: "Capture the light honestly. What makes that hour feel heavy?", difficulty: 2 },
+          { text: "Someone sleeping on public transport", hint: "The awkward angle of the neck. Keep it tender.", difficulty: 3 },
+          { text: "A kitchen counter after cooking a real meal", hint: "The chaos: peels, splatters. Tell the story of the meal.", difficulty: 3 },
+          { text: "Your shoes, worn down and honest", hint: "Draw every scuff. A portrait of how you move.", difficulty: 2 },
+          { text: "Your unmade bed from a low angle", hint: "Make the wrinkles in the sheets feel like a landscape.", difficulty: 2 }
+        ],
+        "People & Faces": [
+          { text: "A face drawn from memory of someone you saw today", hint: "Memory distorts beautifully. Embrace the errors.", difficulty: 3 },
+          { text: "Self-portrait using only your non-dominant hand", hint: "Let go of perfection. The shakiness adds character.", difficulty: 2 },
+          { text: "The back of someone's head", hint: "Posture says more than faces. Portraits don't need eyes.", difficulty: 3 },
+          { text: "An elderly person's hands in detail", hint: "Every wrinkle is a line of their story. Take your time.", difficulty: 5 }
+        ],
+        "Organic": [
+          { text: "A single tree passed every day", hint: "No lollipop trees. Look at the actual structural bones.", difficulty: 3 },
+          { text: "A piece of fruit rotting", hint: "The texture shift where firm becomes soft. Decay has detail.", difficulty: 4 },
+          { text: "Weeds through a crack in concrete", hint: "The tension between hard and soft. Tiny and epic.", difficulty: 3 }
+        ],
+        "Conceptual": [
+          { text: "Draw a sound you heard today", hint: "No symbols. Translate audio into pure visual form.", difficulty: 5 },
+          { text: "The weight of something heavy", hint: "Draw the compression and the strain, not the object.", difficulty: 5 },
+          { text: "What 3AM feels like as a landscape", hint: "The actual sensation—vast, suffocating, or still.", difficulty: 4 }
+        ]
+      };
 
-const cats = Object.keys(IDEAS);
-let activeCat = "all";
-let history = [];
-let last = null;
+      const cats = Object.keys(IDEAS);
+      let activeCat = "all";
+      let history = [];
+      let last = null;
 
-const catsEl = document.getElementById("cats");
-const ideaEl = document.getElementById("idea");
-const labelEl = document.getElementById("label");
-const hintEl = document.getElementById("hint");
-const diffEl = document.getElementById("diff");
-const dots = diffEl.children;
-const genBtn = document.getElementById("genBtn");
-const themeBtn = document.getElementById("themeBtn");
-const histBtn = document.getElementById("histBtn");
-const histPanel = document.getElementById("histPanel");
-const histClose = document.getElementById("histClose");
-const histList = document.getElementById("histList");
-const histNum = document.getElementById("histNum");
-const overlay = document.getElementById("overlay");
+      const catsEl = document.getElementById("cats");
+      const ideaEl = document.getElementById("idea");
+      const labelEl = document.getElementById("label");
+      const hintEl = document.getElementById("hint");
+      const diffEl = document.getElementById("diff");
+      const dots = diffEl.children;
+      const genBtn = document.getElementById("genBtn");
+      const themeBtn = document.getElementById("themeBtn");
+      const histBtn = document.getElementById("histBtn");
+      const histPanel = document.getElementById("histPanel");
+      const histList = document.getElementById("histList");
+      const histNum = document.getElementById("histNum");
+      const overlay = document.getElementById("overlay");
 
-function buildCats() {
-  const all = mk("button", "cat active", "All");
-  all.dataset.cat = "all";
-  catsEl.appendChild(all);
-  cats.forEach(c => {
-    const b = mk("button", "cat", c);
-    b.dataset.cat = c;
-    catsEl.appendChild(b);
-  });
-}
+      function buildCats() {
+        const all = mk("button", "cat active", "all");
+        all.dataset.cat = "all";
+        catsEl.appendChild(all);
+        cats.forEach(c => {
+          const b = mk("button", "cat", c.toLowerCase());
+          b.dataset.cat = c;
+          catsEl.appendChild(b);
+        });
+      }
 
-function mk(tag, cls, txt) {
-  const el = document.createElement(tag);
-  el.className = cls;
-  if (txt) el.textContent = txt;
-  return el;
-}
+      function mk(tag, cls, txt) {
+        const el = document.createElement(tag);
+        el.className = cls;
+        if (txt) el.textContent = txt;
+        return el;
+      }
 
-catsEl.addEventListener("click", e => {
-  const t = e.target.closest(".cat");
-  if (!t) return;
-  catsEl.querySelectorAll(".cat").forEach(c => c.classList.remove("active"));
-  t.classList.add("active");
-  activeCat = t.dataset.cat;
-});
+      catsEl.addEventListener("click", e => {
+        const t = e.target.closest(".cat");
+        if (!t) return;
+        catsEl.querySelectorAll(".cat").forEach(c => c.classList.remove("active"));
+        t.classList.add("active");
+        activeCat = t.dataset.cat;
+      });
 
-function pool() {
-  if (activeCat === "all")
-    return cats.flatMap(c => IDEAS[c].map(i => ({ ...i, category: c })));
-  return IDEAS[activeCat].map(i => ({ ...i, category: activeCat }));
-}
+      function generate() {
+        const p = activeCat === "all" 
+          ? cats.flatMap(c => IDEAS[c].map(i => ({ ...i, category: c })))
+          : IDEAS[activeCat].map(i => ({ ...i, category: activeCat }));
 
-function generate() {
-  const p = pool();
-  let idea;
-  do { idea = p[Math.floor(Math.random() * p.length)]; }
-  while (p.length > 1 && last && idea.text === last.text);
-  last = idea;
+        let idea;
+        do { idea = p[Math.floor(Math.random() * p.length)]; }
+        while (p.length > 1 && last && idea.text === last.text);
+        last = idea;
 
-  // label
-  labelEl.classList.remove("visible");
-  hintEl.classList.remove("visible");
-  diffEl.classList.remove("visible");
+        labelEl.classList.remove("visible");
+        hintEl.classList.remove("visible");
+        diffEl.classList.remove("visible");
 
-  requestAnimationFrame(() => {
-    // words
-    const words = idea.text.split(" ");
-    ideaEl.innerHTML = words
-      .map((w, i) => `<span class="word" style="animation-delay:${i * 0.045}s">${w}&nbsp;</span>`)
-      .join("");
+        requestAnimationFrame(() => {
+          const words = idea.text.split(" ");
+          ideaEl.innerHTML = words
+            .map((w, i) => `<span class="word" style="animation-delay:${i * 0.04}s">${w}&nbsp;</span>`)
+            .join("");
 
-    setTimeout(() => {
-      labelEl.textContent = idea.category;
-      labelEl.classList.add("visible");
-      hintEl.textContent = idea.hint;
-      hintEl.classList.add("visible");
-      diffEl.classList.add("visible");
-    }, 80);
+          setTimeout(() => {
+            labelEl.textContent = idea.category.toLowerCase();
+            labelEl.classList.add("visible");
+            hintEl.textContent = idea.hint;
+            hintEl.classList.add("visible");
+            diffEl.classList.add("visible");
+          }, 50);
 
-    Array.from(dots).forEach((d, i) => {
-      setTimeout(() => d.classList.toggle("on", i < idea.difficulty), i * 50 + 100);
-    });
-  });
+          Array.from(dots).forEach((d, i) => {
+            d.classList.toggle("on", i < idea.difficulty);
+          });
+        });
 
-  history.unshift({ text: idea.text, category: idea.category });
-  if (history.length > 40) history.pop();
-  histNum.textContent = history.length;
-}
+        history.unshift({ text: idea.text, category: idea.category });
+        histNum.textContent = history.length;
+      }
 
-genBtn.addEventListener("click", generate);
+      genBtn.addEventListener("click", generate);
+      document.addEventListener("keydown", e => { if (e.code === "Space") { e.preventDefault(); generate(); } });
 
-document.addEventListener("keydown", e => {
-  if (e.code === "Space" && !e.target.closest("button, input, textarea")) {
-    e.preventDefault();
-    generate();
-  }
-});
+      themeBtn.addEventListener("click", () => {
+        const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+        document.documentElement.dataset.theme = t;
+        themeBtn.textContent = t;
+      });
 
-// theme
-function setTheme(t) {
-  document.documentElement.dataset.theme = t;
-  themeBtn.textContent = t === "dark" ? "Light" : "Dark";
-  localStorage.setItem("theme", t);
-}
+      histBtn.addEventListener("click", () => {
+        histList.innerHTML = history.map(h => `
+          <div class="hist-item">
+            <span class="hist-cat">${h.category.toLowerCase()}</span>
+            <div class="hist-item-text">${h.text}</div>
+          </div>
+        `).join("");
+        histPanel.classList.add("open");
+        overlay.classList.add("open");
+      });
 
-themeBtn.addEventListener("click", () => {
-  setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
-});
+      [document.getElementById("histClose"), overlay].forEach(el => 
+        el.addEventListener("click", () => {
+          histPanel.classList.remove("open");
+          overlay.classList.remove("open");
+        })
+      );
 
-(function () {
-  const s = localStorage.getItem("theme");
-  if (s) setTheme(s);
-})();
-
-// history panel
-function openHist() {
-  histList.innerHTML = "";
-  if (!history.length) {
-    histList.innerHTML = '<div class="hist-empty">Nothing yet</div>';
-  } else {
-    history.forEach((h, i) => {
-      const d = document.createElement("div");
-      d.className = "hist-item";
-      d.style.animationDelay = i * 0.03 + "s";
-      d.innerHTML = `<span class="hist-cat">${h.category}</span>${h.text}`;
-      histList.appendChild(d);
-    });
-  }
-  histPanel.classList.add("open");
-  overlay.classList.add("open");
-}
-
-function closeHist() {
-  histPanel.classList.remove("open");
-  overlay.classList.remove("open");
-}
-
-histBtn.addEventListener("click", openHist);
-histClose.addEventListener("click", closeHist);
-overlay.addEventListener("click", closeHist);
-
-buildCats();
-</script>
-</body>
+      buildCats();
+    </script>
+  </body>
 </html>

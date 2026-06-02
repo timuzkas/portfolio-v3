@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>animate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=BBH+Bartle&family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --panel: #101010;
+      --panel-soft: #0d0d0d;
+      --canvas: #050505;
+      --fg: #f2f2f2;
+      --dim: #737373;
+      --line: rgba(255, 255, 255, 0.1);
+      --accent: #a3a3a3;
+      --danger: #f2f2f2;
+    }
+
+    *,
+    *::before,
+    *::after {
+      letter-spacing: 0;
+    }
+
+    html {
+      background: var(--bg);
+      color: var(--fg);
+      scroll-behavior: smooth;
+    }
+
+    .bbh-bartle-regular {
+      font-family: "BBH Bartle", sans-serif;
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg) !important;
+      color: var(--fg) !important;
+      opacity: 0;
+      animation: fade-in 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fade-in {
+      to { opacity: 1; }
+    }
+
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    ::selection {
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    .canvas-bg {
+      background-size: 24px 24px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 22px;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 2px;
+      border-radius: 9999px;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.18));
+      background-size: 200% 100%;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+      animation: slider-flow 6s linear infinite paused;
+      transition:
+        background-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    input[type="range"]:hover::-webkit-slider-runnable-track,
+    input[type="range"]:focus-visible::-webkit-slider-runnable-track {
+      animation-play-state: running;
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 0 0 4px rgba(255, 255, 255, 0.04);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      margin-top: -7px;
+      border-radius: 0;
+      background: var(--bg);
+      border: 1px solid var(--fg);
+      box-shadow: none;
+      transition:
+        transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+        background 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    input[type="range"]:hover::-webkit-slider-thumb,
+    input[type="range"]:focus-visible::-webkit-slider-thumb {
+      transform: scale(1.12);
+      background: var(--fg);
+      box-shadow: none;
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 2px;
+      border-radius: 9999px;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.18));
+      background-size: 200% 100%;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+      animation: slider-flow 6s linear infinite paused;
+    }
+
+    input[type="range"]:hover::-moz-range-track,
+    input[type="range"]:focus-visible::-moz-range-track {
+      animation-play-state: running;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 0;
+      background: var(--bg);
+      border: 1px solid var(--fg);
+      box-shadow: none;
+      transition:
+        transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+        background 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    input[type="range"]:hover::-moz-range-thumb,
+    input[type="range"]:focus-visible::-moz-range-thumb {
+      transform: scale(1.12);
+      background: var(--fg);
+      box-shadow: none;
+    }
+
+    @keyframes slider-flow {
+      from {
+        background-position: 0% 0%;
+      }
+      to {
+        background-position: 200% 0%;
+      }
+    }
+
+    input,
+    button,
+    pre {
+      font: inherit;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      background: var(--canvas) !important;
+      border-color: var(--line) !important;
+      color: var(--fg) !important;
+      border-radius: 0 !important;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      border-color: var(--fg) !important;
+      box-shadow: none !important;
+    }
+
+    input[type="color"] {
+      background: var(--canvas) !important;
+      border-color: var(--line) !important;
+      border-radius: 0 !important;
+    }
+
+    header,
+    aside,
+    footer,
+    .bg-\[\#0B0F19\],
+    .bg-\[\#090D16\]\/50,
+    .bg-\[\#090D16\]\/80,
+    .bg-\[\#0A0D15\] {
+      background: var(--panel) !important;
+    }
+
+    .bg-\[\#05070B\],
+    .bg-\[\#060910\] {
+      background: var(--canvas) !important;
+    }
+
+    .border-slate-800,
+    .border-slate-800\/60,
+    .border-slate-800\/80,
+    .border-slate-850,
+    .border-slate-850\/40,
+    .border-slate-850\/45,
+    .border-slate-850\/60,
+    .border-slate-850\/80 {
+      border-color: var(--line) !important;
+    }
+
+    .divide-slate-800\/80 > :not([hidden]) ~ :not([hidden]) {
+      border-color: var(--line) !important;
+    }
+
+    .text-slate-100,
+    .text-slate-200,
+    .text-slate-300,
+    .text-white {
+      color: var(--fg) !important;
+    }
+
+    .text-slate-400,
+    .text-slate-450,
+    .text-slate-500,
+    .text-indigo-300,
+    .text-indigo-400,
+    .text-emerald-400 {
+      color: var(--dim) !important;
+    }
+
+    .bg-indigo-600,
+    .bg-indigo-500,
+    .bg-indigo-600\/10,
+    .bg-indigo-600\/5,
+    .bg-emerald-600,
+    .bg-emerald-600\/10,
+    .bg-slate-900,
+    .bg-slate-900\/30,
+    .bg-slate-850,
+    .bg-red-500 {
+      background: transparent !important;
+    }
+
+    .border-indigo-500\/25,
+    .border-indigo-500\/30,
+    .border-emerald-500\/25,
+    .border-red-500\/30 {
+      border-color: var(--line) !important;
+    }
+
+    button {
+      border-radius: 0 !important;
+      transition:
+        color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        background 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    header button,
+    footer button,
+    #copyCssBtn {
+      background: transparent !important;
+      border: 1px solid var(--line) !important;
+      color: var(--fg) !important;
+      font-weight: 500 !important;
+      text-transform: none !important;
+    }
+
+    header button:hover,
+    footer button:hover,
+    #copyCssBtn:hover {
+      background: var(--fg) !important;
+      border-color: var(--fg) !important;
+      color: var(--bg) !important;
+      transform: translateY(-1px);
+    }
+
+    .topbar-link {
+      border-radius: 0 !important;
+      background: rgba(0, 0, 0, 0.28) !important;
+      border: 1px solid var(--line) !important;
+      color: var(--fg) !important;
+      transition:
+        color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        background 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    .topbar-link:hover {
+      background: rgba(0, 0, 0, 0.65) !important;
+      border-color: var(--fg) !important;
+      color: var(--fg) !important;
+      transform: translateY(-1px);
+    }
+
+    #playBtn {
+      background: var(--fg) !important;
+      color: var(--bg) !important;
+      border-color: var(--fg) !important;
+      box-shadow: none !important;
+    }
+
+    #playBtn:hover {
+      transform: scale(1.05);
+    }
+
+    #addKfBtn::before {
+      color: currentColor;
+    }
+
+    h1,
+    header h1 {
+      font-weight: 700 !important;
+      letter-spacing: 0 !important;
+    }
+
+    header h1.bbh-bartle-regular {
+      display: inline-flex;
+      align-items: baseline;
+      font-weight: 400 !important;
+      transform-origin: left center;
+      cursor: default;
+      position: relative;
+      isolation: isolate;
+      gap: 0.01em;
+    }
+
+    .wordmark-letter {
+      --lift: 0;
+      --lean: 0;
+      --tone: 0;
+      display: inline-block;
+      color: color-mix(in srgb, var(--fg) calc(72% + var(--tone) * 28%), var(--dim));
+      transform:
+        translateY(calc(var(--lift) * -0.23em))
+        rotate(calc(var(--lean) * 4deg));
+      transform-origin: 50% 85%;
+      transition:
+        color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform;
+    }
+
+    header h1.bbh-bartle-regular:hover .wordmark-letter {
+      color: var(--fg);
+    }
+
+    header h1.bbh-bartle-regular:not(.is-interacting):hover .wordmark-letter {
+      transform: translateY(-0.08em);
+    }
+
+    header h1.bbh-bartle-regular:not(.is-interacting):hover .wordmark-letter:nth-child(2n) {
+      transform: translateY(0.05em);
+    }
+
+    .panel-action-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel-soft);
+    }
+
+    .panel-action-row button {
+      flex: 1;
+      min-width: 0;
+      height: 2.25rem;
+      padding: 0 0.7rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      border: 1px solid var(--line) !important;
+      background: var(--canvas) !important;
+      color: var(--fg) !important;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .panel-action-row button:hover {
+      background: var(--fg) !important;
+      color: var(--bg) !important;
+      border-color: var(--fg) !important;
+      transform: translateY(-1px);
+    }
+
+    .panel-action-row svg {
+      width: 0.9rem;
+      height: 0.9rem;
+      flex: 0 0 auto;
+    }
+
+    .export-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.35rem;
+    }
+
+    .export-tab {
+      border: 1px solid var(--line) !important;
+      background: var(--canvas) !important;
+      color: var(--dim) !important;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.45rem 0.5rem;
+      text-align: center;
+    }
+
+    .export-tab.is-active {
+      background: var(--fg) !important;
+      color: var(--bg) !important;
+      border-color: var(--fg) !important;
+    }
+
+    .export-tab:hover {
+      background: rgba(255, 255, 255, 0.06) !important;
+      color: var(--fg) !important;
+      border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    header p,
+    label,
+    .uppercase,
+    #outputCssContent,
+    .mono {
+      letter-spacing: 0 !important;
+    }
+
+    .uppercase {
+      text-transform: uppercase;
+    }
+
+    #layersContainer > div,
+    #tracksLabelsLayout > div {
+      border-radius: 0 !important;
+      background: transparent !important;
+      color: var(--dim) !important;
+      border-color: var(--line) !important;
+    }
+
+    #layersContainer > div:hover,
+    #tracksLabelsLayout > div:hover {
+      color: var(--fg) !important;
+      border-color: var(--fg) !important;
+    }
+
+    #layersContainer > div[class*="border-indigo"],
+    #tracksLabelsLayout > div[class*="text-indigo"] {
+      color: var(--fg) !important;
+      border-color: var(--fg) !important;
+      background: rgba(255, 255, 255, 0.04) !important;
+    }
+
+    #layersContainer span[style],
+    #tracksLabelsLayout .bg-slate-850 {
+      border-radius: 0 !important;
+      filter: grayscale(1);
+    }
+
+    #outputCssContent {
+      color: var(--accent) !important;
+    }
+
+    #timelineScrubCursor {
+      background: var(--fg) !important;
+    }
+
+    #timelineScrubCursor::before {
+      background: var(--fg) !important;
+    }
+
+    #tracksContentLayout button {
+      background: var(--fg) !important;
+      border-color: var(--bg) !important;
+      box-shadow: none !important;
+      overflow: visible;
+      transform: translateX(-50%) rotate(45deg) !important;
+      transition:
+        background 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    #tracksContentLayout button::before {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      background: transparent;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.75);
+      transition:
+        opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #tracksContentLayout button:hover {
+      background: var(--bg) !important;
+      border-color: var(--fg) !important;
+      box-shadow:
+        0 0 0 4px rgba(255, 255, 255, 0.08),
+        0 0 0 9px rgba(255, 255, 255, 0.035) !important;
+      transform: translateX(-50%) rotate(45deg) scale(1.28) !important;
+    }
+
+    #tracksContentLayout button:hover::before {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    #addKfBtn {
+      letter-spacing: 0.05em;
+    }
+
+    #addKfBtn::before {
+      content: '◆';
+      display: inline-block;
+      margin-right: 0.55rem;
+      font-size: 0.8rem;
+      line-height: 1;
+      transform: translateY(-0.5px);
+    }
+
+    #tracksContentLayout button[class*="yellow"] {
+      outline: 1px solid var(--fg);
+      outline-offset: 2px;
+    }
+
+    #rulerBar .ruler-tick {
+      transform: translateX(-50%);
+    }
+
+    #interactiveSandbox .absolute {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0 !important;
+    }
+
+    .rounded,
+    .rounded-lg,
+    .rounded-xl {
+      border-radius: 0 !important;
+    }
+  </style>
+  <style id="computed-styles"></style>
+</head>
+<body class="bg-[#090D16] text-slate-100 h-screen overflow-hidden flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-[#0B0F19] px-6 py-3 flex justify-between items-center shrink-0">
+    <div class="flex items-center gap-3">
+      <div>
+        <h1 class="bbh-bartle-regular text-2xl leading-none" data-text="animate" aria-label="animate">
+          <span class="wordmark-letter" aria-hidden="true">a</span>
+          <span class="wordmark-letter" aria-hidden="true">n</span>
+          <span class="wordmark-letter" aria-hidden="true">i</span>
+          <span class="wordmark-letter" aria-hidden="true">m</span>
+          <span class="wordmark-letter" aria-hidden="true">a</span>
+          <span class="wordmark-letter" aria-hidden="true">t</span>
+          <span class="wordmark-letter" aria-hidden="true">e</span>
+        </h1>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="https://github.com/timuzkas/portfolio-v3" target="_blank" rel="noopener" aria-label="GitHub repository" class="topbar-link h-8 w-8 flex items-center justify-center">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.596 2 12.262c0 4.533 2.865 8.376 6.839 9.734.5.094.683-.222.683-.494 0-.244-.009-1.058-.014-1.919-2.782.621-3.369-1.203-3.369-1.203-.455-1.185-1.11-1.501-1.11-1.501-.908-.636.069-.623.069-.623 1.004.073 1.532 1.057 1.532 1.057.892 1.568 2.341 1.115 2.91.853.091-.663.349-1.115.635-1.371-2.221-.259-4.555-1.139-4.555-5.069 0-1.12.39-2.036 1.03-2.753-.103-.259-.446-1.302.098-2.714 0 0 .84-.276 2.75 1.052A9.41 9.41 0 0 1 12 6.965c.85.004 1.705.118 2.504.346 1.908-1.328 2.746-1.052 2.746-1.052.546 1.412.203 2.455.1 2.714.641.717 1.028 1.633 1.028 2.753 0 3.94-2.338 4.807-4.566 5.061.359.318.678.945.678 1.904 0 1.374-.012 2.482-.012 2.819 0 .274.18.599.688.497C19.137 20.644 22 16.803 22 12.262 22 6.596 17.523 2 12 2Z"/>
+        </svg>
+      </a>
+      <button id="resetConfigBtn" class="bg-slate-900 border border-slate-800 hover:border-slate-700 font-medium text-xs py-1.5 px-3 rounded transition flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M5.64 15A7 7 0 0017.66 18.36M18.36 9A7 7 0 006.34 5.64"/>
+        </svg>
+        Reset
+      </button>
+      <div class="h-4 w-px bg-slate-800"></div>
+      <button id="shareConfigBtn" class="bg-slate-900 border border-slate-800 hover:border-slate-700 font-medium text-xs py-1.5 px-3 rounded transition flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 10.742l5.064-2.532m0 5.564l-5.064-2.532M21 12a3 3 0 11-6 0 3 3 0 016 0zm-11-4a3 3 0 11-6 0 3 3 0 016 0zm0 8a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        Share Sandbox
+      </button>
+    </div>
+  </header>
+
+  <!-- Workspace Container Layout -->
+  <div class="flex-1 flex overflow-hidden min-h-0">
+    
+    <!-- Left Panel: Layers and Properties -->
+    <aside class="w-80 border-r border-slate-800/80 bg-[#0B0F19] flex flex-col divide-y divide-slate-800/80 shrink-0">
+      
+      <!-- Scene Layers List -->
+      <div class="flex-1 flex flex-col min-h-0">
+        <div class="px-4 py-3 flex justify-between items-center bg-[#090D16]/50 gap-3">
+          <div class="flex items-center gap-2">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Layers</span>
+            <span id="layerCount" class="mono text-[10px] bg-slate-850 px-1.5 py-0.5 rounded text-slate-500">2</span>
+          </div>
+        </div>
+        <div class="panel-action-row">
+          <button id="layersAddTextBtn" class="border border-slate-800 text-slate-400 hover:border-slate-700" title="Add text layer">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 7V5h16v2M12 5v14M8 19h8"/>
+            </svg>
+            Text
+          </button>
+          <button id="layersAddShapeBtn" class="border border-slate-800 text-slate-400 hover:border-slate-700" title="Add box layer">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 5h14v14H5z"/>
+            </svg>
+            Box
+          </button>
+        </div>
+        <div id="layersContainer" class="flex-1 overflow-y-auto p-2 space-y-1"></div>
+      </div>
+
+      <!-- Selected Keyframe / Properties Panel -->
+      <div class="flex-1 flex flex-col min-h-0 bg-[#0B0F19]">
+        <div class="px-4 py-3 bg-[#090D16]/50 flex justify-between items-center border-b border-slate-800/80">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Inspector</span>
+          <span id="activeKeyframeBadge" class="mono text-[10px] text-indigo-400 font-bold">0% Keyframe</span>
+        </div>
+
+        <div id="inspectorWarning" class="p-6 text-center text-xs text-slate-500 my-auto hidden">
+          Select a layer's keyframe in the timeline to edit properties.
+        </div>
+
+        <div id="layerConfigForm" class="p-4 overflow-y-auto space-y-4 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1">Layer Label / Value</label>
+            <input type="text" id="prop-content" class="w-full bg-[#05070B] border border-slate-800 rounded px-2.5 py-1.5 text-white focus:outline-none focus:border-indigo-500 transition">
+          </div>
+          
+          <div class="h-px bg-slate-800/60 my-2"></div>
+
+          <div class="space-y-3.5">
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-slate-400">Position Offset</span>
+                <span id="val-pos" class="mono text-[10px] text-slate-500">0px, 0px</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="relative">
+                  <span class="absolute left-1.5 top-1 px-1 text-[8px] mono text-slate-500">X</span>
+                  <input type="number" id="prop-x" class="w-full bg-[#05070B] border border-slate-800 rounded pl-5 pr-2 py-1 text-xs text-white">
+                </div>
+                <div class="relative">
+                  <span class="absolute left-1.5 top-1 px-1 text-[8px] mono text-slate-500">Y</span>
+                  <input type="number" id="prop-y" class="w-full bg-[#05070B] border border-slate-800 rounded pl-5 pr-2 py-1 text-xs text-white">
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-400">Scale</span>
+                  <span id="val-scale" class="mono text-[10px] text-slate-500">1</span>
+                </div>
+                <input type="range" id="prop-scale" min="0" max="3" step="0.05" class="w-full accent-indigo-500">
+              </div>
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-400">Rotate</span>
+                  <span id="val-rotate" class="mono text-[10px] text-slate-500">0°</span>
+                </div>
+                <input type="range" id="prop-rotate" min="-360" max="360" class="w-full accent-indigo-500">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-400">Opacity</span>
+                  <span id="val-opacity" class="mono text-[10px] text-slate-500">1</span>
+                </div>
+                <input type="range" id="prop-opacity" min="0" max="1" step="0.05" class="w-full accent-indigo-500">
+              </div>
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-400">Blur</span>
+                  <span id="val-blur" class="mono text-[10px] text-slate-500">0px</span>
+                </div>
+                <input type="range" id="prop-blur" min="0" max="40" class="w-full accent-indigo-500">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-400">Custom / Radi</span>
+                  <span id="val-mod" class="mono text-[10px] text-slate-500">0</span>
+                </div>
+                <input type="range" id="prop-mod" min="0" max="100" class="w-full accent-indigo-500">
+              </div>
+              <div>
+                <label id="lbl-color" class="block text-slate-400 mb-1">Color Fill</label>
+                <input type="color" id="prop-color" class="h-6 w-full bg-[#05070B] border border-slate-800 rounded p-0.5 cursor-pointer">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Canvas Preview Layer (Center) & CSS Export Panel (Right) -->
+    <section class="flex-1 flex overflow-hidden">
+      <!-- Preview Center Canvas -->
+      <div class="flex-1 flex flex-col relative bg-[#05070B] p-6 relative">
+        <div class="absolute top-4 left-6 z-10 select-none">
+          <!-- <span class="text-[10px] tracking-widest text-slate-500 font-bold uppercase">Canvas</span> -->
+        </div>
+
+        <div class="flex-1 canvas-bg border border-slate-800/60 rounded-xl relative flex justify-center items-center overflow-hidden">
+          <div id="interactiveSandbox" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <!-- Layers render targets are appended here via JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Export Panel -->
+      <div class="w-80 border-l border-slate-800/80 bg-[#0B0F19] flex flex-col overflow-hidden shrink-0">
+        <div class="px-4 py-3 bg-[#090D16]/50 border-b border-slate-800/80 flex justify-between items-center">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Export</span>
+          <button id="copyCssBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] uppercase py-1 px-2.5 rounded transition">Copy CSS</button>
+        </div>
+        <div class="flex-1 p-4 flex flex-col min-h-0 space-y-4">
+          <div class="export-tabs" id="export-tabs">
+            <button class="export-tab is-active" data-export-format="css" type="button">CSS</button>
+            <button class="export-tab" data-export-format="html-css" type="button">HTML</button>
+            <!-- <button class="export-tab" data-export-format="tailwind-html" type="button">Tailwind + HTML</button> -->
+          </div>
+          
+          <div class="flex-1 select-all pointer-events-auto bg-[#05070B] border border-slate-800/80 rounded-lg p-3 overflow-y-auto">
+            <pre id="outputCssContent" class="mono text-[10px] text-indigo-300 leading-relaxed whitespace-pre"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Timeline Interface (Bottom Viewport) -->
+  <footer class="h-56 border-t border-slate-800/80 bg-[#0B0F19] flex flex-col select-none shrink-0">
+    <!-- Controls Bar -->
+    <div class="flex items-center justify-between px-6 py-2 border-b border-slate-800/60 bg-[#090D16]/80 text-xs">
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-2">
+          <button id="playBtn" class="bg-indigo-600 hover:bg-indigo-500 hover:scale-105 active:scale-95 text-white h-7 w-7 flex items-center justify-center rounded-full transition shadow-lg shadow-indigo-600/10">
+            <svg id="playIcon" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="pauseIcon" class="w-3.5 h-3.5 fill-current hidden" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-slate-400 font-medium">Duration:</span>
+          <input type="range" id="timelineDuration" min="1" max="10" step="0.5" value="3.5" class="w-24 accent-indigo-500">
+          <span id="durationLabel" class="mono text-[11px] text-slate-300">3.5s</span>
+        </div>
+
+        <div class="h-4 w-px bg-slate-800"></div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-slate-400 font-medium font-semibold text-indigo-400">Playhead at: <span id="masterPlayheadLabel" class="mono text-white">0%</span></span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="addKfBtn" class="bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/25 px-2.5 py-1 rounded text-[11px] font-bold transition">New Keyframe</button>
+        <button id="delKfBtn" class="border border-slate-800 hover:bg-red-500/15 hover:text-red-400 hover:border-red-500/30 px-2.5 py-1 rounded text-[11px] font-bold text-slate-400 transition">- Remove Keyframe</button>
+      </div>
+    </div>
+
+    <!-- Timeline Body Grid -->
+    <div class="flex-1 flex overflow-hidden">
+      <!-- Timeline Header Rows / Labels Stack -->
+      <div class="w-80 border-r border-slate-850 bg-[#0A0D15] flex flex-col shrink-0">
+        <div class="h-8 border-b border-slate-850 px-4 flex items-center text-[10px] uppercase font-bold text-slate-500 tracking-wider">Tracks / Layers</div>
+        <div id="tracksLabelsLayout" class="flex-1 overflow-y-auto divide-y divide-slate-850/40 p-1.5 space-y-1">
+          <!-- Populated from JS layer keys -->
+        </div>
+      </div>
+
+      <!-- Time Tracks Ruler & Grid Grid -->
+      <div id="timelineTimelineArea" class="flex-1 flex flex-col overflow-x-auto min-w-0 bg-[#060910]">
+        <!-- Ruler bar -->
+        <div id="rulerBar" class="h-8 border-b border-slate-850/80 relative select-none">
+          <!-- Ticks generated dynamic code -->
+        </div>
+
+        <!-- Scrollable Tracks container -->
+        <div id="tracksContentLayout" class="flex-1 overflow-y-auto p-1.5 space-y-1 relative">
+          <!-- Visual Dynamic Keyframes Tracks -->
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function cloneLayers(layers) {
+      return JSON.parse(JSON.stringify(layers));
+    }
+
+    const defaultLayers = [
+      {
+        id: "ly-1",
+        name: "Center Title",
+        type: "text",
+        content: "HELLO WORLD",
+        keyframes: {
+          "0":   { x: 0, y: -40, scale: 0.6, rotate: -25, opacity: 0, blur: 15, mod: 20, color: "#737373" },
+          "50":  { x: 0, y: 15, scale: 1.15, rotate: 10, opacity: 1, blur: 0, mod: 0, color: "#f2f2f2" },
+          "100": { x: 0, y: 0, scale: 1, rotate: 0, opacity: 1, blur: 0, mod: 0, color: "#a3a3a3" }
+        }
+      },
+      {
+        id: "ly-2",
+        name: "Halo Ring",
+        type: "box",
+        content: "",
+        keyframes: {
+          "0":   { x: 0, y: 0, scale: 1, rotate: 0, opacity: 0.1, blur: 0, mod: 50, color: "#262626" },
+          "50":  { x: 0, y: 0, scale: 1.8, rotate: 180, opacity: 0.36, blur: 10, mod: 40, color: "#737373" },
+          "100": { x: 0, y: 0, scale: 1, rotate: 360, opacity: 0.1, blur: 0, mod: 50, color: "#262626" }
+        }
+      }
+    ];
+
+    // State Store
+    let state = {
+      duration: 3.5,
+      isPlaying: true,
+      currentPlayhead: 0, // Current active scrubbing percent limit [0-100]
+      selectedLayerId: null,
+      selectedPercent: 0,
+      exportFormat: 'css',
+      layers: cloneLayers(defaultLayers)
+    };
+
+    // DOM selectors
+    const sheets = document.getElementById('computed-styles');
+    const layersBox = document.getElementById('layersContainer');
+    const tracksLabelsBox = document.getElementById('tracksLabelsLayout');
+    const tracksContentBox = document.getElementById('tracksContentLayout');
+    const rulerBar = document.getElementById('rulerBar');
+    const visualSandbox = document.getElementById('interactiveSandbox');
+    const outputCssBox = document.getElementById('outputCssContent');
+    
+    // Playback loop elements
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const durationInput = document.getElementById('timelineDuration');
+    const durationLabel = document.getElementById('durationLabel');
+    const masterPlayheadLabel = document.getElementById('masterPlayheadLabel');
+    const resetConfigBtn = document.getElementById('resetConfigBtn');
+    const exportTabButtons = Array.from(document.querySelectorAll('[data-export-format]'));
+
+    // Controls Action Keyframes elements 
+    const addKfBtn = document.getElementById('addKfBtn');
+    const delKfBtn = document.getElementById('delKfBtn');
+    const layersAddTextBtn = document.getElementById('layersAddTextBtn');
+    const layersAddShapeBtn = document.getElementById('layersAddShapeBtn');
+
+    // Property elements
+    const layerConfigForm = document.getElementById('layerConfigForm');
+    const inspectorWarning = document.getElementById('inspectorWarning');
+    const activeBadge = document.getElementById('activeKeyframeBadge');
+    
+    // Auto Default Selected Layer
+    state.selectedLayerId = state.layers[0].id;
+    state.selectedPercent = 0;
+
+    // Timeline Loop setup properties
+    // We achieve playhead tracking using raw CSS variables injecting play state configs. Only update code dynamically.
+    function generateUUID() {
+      return "ly-" + Math.random().toString(36).substr(2, 9);
+    }
+
+    function getExportFormatLabel(format) {
+      if (format === 'html-css') return 'HTML';
+      if (format === 'tailwind-html') return 'Tailwind + HTML';
+      return 'CSS';
+    }
+
+    function getExportCopyLabel() {
+      return `Copy ${getExportFormatLabel(state.exportFormat)}`;
+    }
+
+    function syncExportTabs() {
+      exportTabButtons.forEach((button) => {
+        const isActive = button.dataset.exportFormat === state.exportFormat;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+      });
+      document.getElementById('copyCssBtn').innerText = getExportCopyLabel();
+    }
+
+    function setExportFormat(format) {
+      state.exportFormat = format;
+      syncExportTabs();
+      outputCssBox.innerText = buildExportMarkup(state.exportFormat);
+    }
+
+    function buildAnimationBundle(selectorForLayer) {
+      let bundle = '';
+
+      state.layers.forEach((layer) => {
+        let keyframesStr = `/* ${layer.name} */\n@keyframes anim-${layer.id} {\n`;
+        const percents = Object.keys(layer.keyframes).sort((a, b) => parseInt(a) - parseInt(b));
+
+        percents.forEach((pct) => {
+          const kf = layer.keyframes[pct];
+          const trs = `transform: translate(${kf.x}px, ${kf.y}px) rotate(${kf.rotate}deg) scale(${kf.scale});`;
+          const op = `opacity: ${kf.opacity};`;
+          const bl = `filter: blur(${kf.blur}px);`;
+          const custom = layer.type === 'text'
+            ? `color: ${kf.color}; letter-spacing: ${kf.mod / 4}px;`
+            : `background-color: ${kf.color}; border-radius: ${kf.mod}%;`;
+
+          keyframesStr += `  ${pct}% {\n    ${trs}\n    ${op}\n    ${bl}\n    ${custom}\n  }\n`;
+        });
+
+        keyframesStr += `}\n\n`;
+        bundle += keyframesStr;
+        bundle += `${selectorForLayer(layer)} {\n  animation: anim-${layer.id} ${state.duration}s cubic-bezier(0.25, 1, 0.5, 1) infinite;\n}\n\n`;
+      });
+
+      return bundle;
+    }
+
+    function getLayerFirstKeyframe(layer) {
+      const keys = Object.keys(layer.keyframes).map(Number).sort((a, b) => a - b);
+      return layer.keyframes[String(keys[0])];
+    }
+
+    function buildLayerBaseRule(layer, selector, isTailwind) {
+      const firstKf = getLayerFirstKeyframe(layer);
+
+      if (layer.type === 'text') {
+        const common = isTailwind
+          ? 'grid-area: 1 / 1; white-space: nowrap; display: inline-block; line-height: 1; font-weight: 700; font-family: \'Syne\', sans-serif;'
+          : 'grid-area: 1 / 1; white-space: nowrap; display: inline-block; line-height: 1; font-weight: 700; font-family: \'Syne\', sans-serif; font-size: 4rem;';
+
+        return `${selector} {\n  ${common}\n  color: ${firstKf.color};\n}\n`;
+      }
+
+      return `${selector} {\n  grid-area: 1 / 1;\n  width: 7rem;\n  height: 7rem;\n  background-color: ${firstKf.color};\n  border-radius: ${firstKf.mod}%;\n}\n`;
+    }
+
+    function buildExportMarkup(format) {
+      const isTailwind = format === 'tailwind-html';
+      const layersMarkup = state.layers.map((layer) => {
+        if (layer.type === 'text') {
+          if (isTailwind) {
+            return `<div id="${layer.id}" class="col-start-1 row-start-1 select-none whitespace-nowrap text-6xl font-bold leading-none">${layer.content}</div>`;
+          }
+
+          return `<div id="${layer.id}">${layer.content}</div>`;
+        }
+
+        if (isTailwind) {
+          return `<div id="${layer.id}" class="col-start-1 row-start-1 select-none w-28 h-28"></div>`;
+        }
+
+        return `<div id="${layer.id}"></div>`;
+      }).join('\n    ');
+
+      if (format === 'html-css') {
+        const styles = `
+      :root {
+        --bg: #0a0a0a;
+        --fg: #f2f2f2;
+        --dim: #737373;
+      }
+
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: 'Syne', sans-serif;
+      }
+
+      .stage {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        background: var(--bg);
+      }
+
+      .stage > * {
+        grid-area: 1 / 1;
+      }
+
+${state.layers.map((layer) => buildLayerBaseRule(layer, `#${layer.id}`, false)).join('\n')}
+${buildAnimationBundle((layer) => `#${layer.id}`)}`;
+
+        return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>animate export</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700&display=swap" rel="stylesheet" />
+    <style>${styles}
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+    ${layersMarkup}
+    </div>
+  </body>
+</html>`;
+      }
+
+      if (format === 'tailwind-html') {
+        const styles = `
+      :root {
+        --bg: #0a0a0a;
+        --fg: #f2f2f2;
+      }
+
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: 'Syne', sans-serif;
+      }
+
+      #scene > * {
+        grid-area: 1 / 1;
+      }
+
+${state.layers.map((layer) => buildLayerBaseRule(layer, `#${layer.id}`, true)).join('\n')}
+${buildAnimationBundle((layer) => `#${layer.id}`)}`;
+
+        return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>animate export</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <style>${styles}
+    </style>
+  </head>
+  <body class="min-h-screen bg-[#0a0a0a] text-[#f2f2f2] grid place-items-center overflow-hidden">
+    <div id="scene" class="grid place-items-center">
+    ${layersMarkup}
+    </div>
+  </body>
+</html>`;
+      }
+
+      return `/* CSS Output Bundle */\n\n${buildAnimationBundle((layer) => `#${layer.id}`)}`;
+    }
+
+    function syncPlaybackButton() {
+      if (state.isPlaying) {
+        playIcon.classList.add('hidden');
+        pauseIcon.classList.remove('hidden');
+      } else {
+        playIcon.classList.remove('hidden');
+        pauseIcon.classList.add('hidden');
+      }
+    }
+
+    // Initialize Ruler Ticks
+    function initRuler() {
+      rulerBar.innerHTML = '';
+      for (let i = 0; i <= 100; i += 10) {
+        const tick = document.createElement('div');
+        tick.className = "ruler-tick absolute top-0 bottom-0 text-[9px] text-slate-500 border-l border-slate-850/60 pt-1 pl-1 select-none pointer-events-none";
+        tick.style.left = `${i}%`;
+        tick.innerText = `${i}%`;
+        rulerBar.appendChild(tick);
+      }
+      
+      // Inject interactive Draggable Scrub Playhead trigger element
+      const scrubber = document.createElement('div');
+      scrubber.id = "timelineScrubCursor";
+      scrubber.className = "absolute top-0 bottom-1 w-[2px] bg-red-500 cursor-ew-resize z-30 transform -translate-x-1/2 before:content-[''] before:absolute before:top-0 before:left-1/2 before:-translate-x-1/2 before:w-3 before:height-3 before:bg-red-500 before:rotate-45";
+      scrubber.style.left = `${state.currentPlayhead}%`;
+      rulerBar.appendChild(scrubber);
+
+      rulerBar.addEventListener('mousedown', (e) => {
+        const bounds = rulerBar.getBoundingClientRect();
+        function moveScrub(evt) {
+          const clientX = evt.clientX || (evt.touches ? evt.touches[0].clientX : 0);
+          let pct = Math.round(((clientX - bounds.left) / bounds.width) * 100);
+          pct = Math.max(0, Math.min(100, pct));
+          state.currentPlayhead = pct;
+          scrubber.style.left = `${pct}%`;
+          masterPlayheadLabel.innerText = `${pct}%`;
+          
+          if (!state.isPlaying) {
+            applyUniversalPropertiesOffsetStateToDOM(pct);
+          }
+        }
+        function dropScrub() {
+          window.removeEventListener('mousemove', moveScrub);
+          window.removeEventListener('mouseup', dropScrub);
+        }
+        window.addEventListener('mousemove', moveScrub);
+        window.addEventListener('mouseup', dropScrub);
+        moveScrub(e);
+      });
+    }
+
+    // Render Layers Sidebar Panel and Tracks Visualizer
+    function renderLayers() {
+      layersBox.innerHTML = '';
+      tracksLabelsBox.innerHTML = '';
+      tracksContentBox.innerHTML = '';
+      document.getElementById('layerCount').innerText = state.layers.length;
+
+      state.layers.forEach((layer) => {
+        const isSelected = layer.id === state.selectedLayerId;
+        
+        // Element Item
+        const layerItem = document.createElement('div');
+        layerItem.className = `p-2.5 rounded-lg border text-xs flex justify-between items-center cursor-pointer transition ${
+          isSelected ? 'bg-indigo-600/10 border-indigo-500/30' : 'bg-slate-900/30 border-slate-800 hover:border-slate-700'
+        }`;
+        layerItem.onclick = () => selectLayer(layer.id);
+        layerItem.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded" style="background-color: ${layer.type === 'text' ? '#f2f2f2' : '#737373'}"></span>
+            <span class="font-medium text-slate-200 select-none">${layer.name}</span>
+          </div>
+          <button onclick="event.stopPropagation(); deleteLayer('${layer.id}')" class="text-slate-500 hover:text-red-400 p-0.5 rounded transition">
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+          </button>
+        `;
+        layersBox.appendChild(layerItem);
+
+        // Sidebar track title
+        const trackTitle = document.createElement('div');
+        trackTitle.className = `h-10 px-3 flex items-center justify-between text-xs rounded transition ${
+          isSelected ? 'bg-indigo-600/5 text-indigo-300' : 'text-slate-450'
+        }`;
+        trackTitle.innerHTML = `
+          <span class="truncate font-medium">${layer.name}</span>
+          <span class="text-[9px] px-1 bg-slate-850 text-slate-500 rounded font-bold uppercase mono">${layer.type}</span>
+        `;
+        tracksLabelsBox.appendChild(trackTitle);
+
+        // Grid frame timeline track row
+        const trackRow = document.createElement('div');
+        trackRow.className = "h-10 relative border-b border-slate-850/45 w-full flex items-center select-none";
+        
+        // Render Keyframe Nodes over tracks
+        Object.keys(layer.keyframes).forEach((pct) => {
+          const isKfxSelected = isSelected && (parseInt(pct) === state.selectedPercent);
+          
+          const dot = document.createElement('button');
+          dot.className = `absolute h-3.5 w-3.5 transform -translate-x-1/2 rounded rotate-45 border transition-all ${
+            isKfxSelected 
+              ? 'bg-yellow-400 border-yellow-200 scale-125 shadow shadow-yellow-400/30' 
+              : 'bg-indigo-500 border-indigo-300 hover:bg-white hover:scale-110'
+          }`;
+          dot.style.left = `${pct}%`;
+          dot.onclick = (e) => {
+            e.stopPropagation();
+            selectKeyframe(layer.id, parseInt(pct));
+          };
+          trackRow.appendChild(dot);
+        });
+
+        tracksContentBox.appendChild(trackRow);
+      });
+    }
+
+    // Selected keyframes properties interface updates
+    function updatePropertiesForm() {
+      const activeLayer = state.layers.find(l => l.id === state.selectedLayerId);
+      if (!activeLayer || state.selectedPercent === null) {
+        layerConfigForm.classList.add('hidden');
+        inspectorWarning.classList.remove('hidden');
+        return;
+      }
+
+      layerConfigForm.classList.remove('hidden');
+      inspectorWarning.classList.add('hidden');
+
+      activeBadge.innerText = `${activeLayer.name} @ ${state.selectedPercent}%`;
+
+      const kf = activeLayer.keyframes[state.selectedPercent];
+      
+      document.getElementById('prop-content').value = activeLayer.content;
+      document.getElementById('prop-content').disabled = activeLayer.type !== 'text';
+
+      document.getElementById('prop-x').value = kf.x;
+      document.getElementById('prop-y').value = kf.y;
+      document.getElementById('prop-scale').value = kf.scale;
+      document.getElementById('prop-rotate').value = kf.rotate;
+      document.getElementById('prop-opacity').value = kf.opacity;
+      document.getElementById('prop-blur').value = kf.blur;
+      document.getElementById('prop-mod').value = kf.mod;
+      document.getElementById('prop-color').value = kf.color;
+
+      document.getElementById('val-pos').innerText = `${kf.x}px, ${kf.y}px`;
+      document.getElementById('val-scale').innerText = kf.scale;
+      document.getElementById('val-rotate').innerText = `${kf.rotate}°`;
+      document.getElementById('val-opacity').innerText = kf.opacity;
+      document.getElementById('val-blur').innerText = `${kf.blur}px`;
+      document.getElementById('val-mod').innerText = kf.mod;
+      document.getElementById('lbl-color').innerText = activeLayer.type === 'text' ? "Font Color" : "Background";
+    }
+
+    // Save Inputs
+    layerConfigForm.addEventListener('input', (e) => {
+      const activeLayer = state.layers.find(l => l.id === state.selectedLayerId);
+      if (!activeLayer) return;
+
+      if (e.target.id === 'prop-content') {
+        activeLayer.content = e.target.value;
+        const domTarget = document.getElementById(`visual-${activeLayer.id}`);
+        if (domTarget) domTarget.innerText = activeLayer.content;
+      } else {
+        const prop = e.target.id.replace('prop-', '');
+        const kf = activeLayer.keyframes[state.selectedPercent];
+        if (kf) {
+          kf[prop] = (e.target.type === 'number' || e.target.type === 'range') ? parseFloat(e.target.value) : e.target.value;
+        }
+      }
+      
+      updateLabelsPreview();
+      compileGlobalCSS();
+    });
+
+    function updateLabelsPreview() {
+      const activeLayer = state.layers.find(l => l.id === state.selectedLayerId);
+      if (!activeLayer) return;
+      const kf = activeLayer.keyframes[state.selectedPercent];
+      if (!kf) return;
+      
+      document.getElementById('val-pos').innerText = `${kf.x}px, ${kf.y}px`;
+      document.getElementById('val-scale').innerText = kf.scale;
+      document.getElementById('val-rotate').innerText = `${kf.rotate}°`;
+      document.getElementById('val-opacity').innerText = kf.opacity;
+      document.getElementById('val-blur').innerText = `${kf.blur}px`;
+      document.getElementById('val-mod').innerText = kf.mod;
+    }
+
+    // Element Handlers
+    function selectLayer(id) {
+      state.selectedLayerId = id;
+      state.selectedPercent = 0;
+      renderLayers();
+      updatePropertiesForm();
+    }
+
+    function selectKeyframe(layerId, pct) {
+      state.selectedLayerId = layerId;
+      state.selectedPercent = pct;
+      renderLayers();
+      updatePropertiesForm();
+    }
+
+    function addLayer(type) {
+      const id = generateUUID();
+      const newLayer = {
+        id,
+        name: type === 'text' ? "New Text Layer" : "New Box Layer",
+        type,
+        content: type === 'text' ? "ANIMATE LAB" : "",
+        keyframes: {
+          "0": { x: 0, y: 0, scale: 1, rotate: 0, opacity: 1, blur: 0, mod: type === 'text' ? 0 : 8, color: type === 'text' ? '#f2f2f2' : '#737373' },
+          "100": { x: 0, y: 0, scale: 1, rotate: 180, opacity: 1, blur: 0, mod: type === 'text' ? 10 : 50, color: '#a3a3a3' }
+        }
+      };
+
+      state.layers.push(newLayer);
+      state.selectedLayerId = id;
+      state.selectedPercent = 0;
+      
+      syncSandboxHTMLLayers();
+      renderLayers();
+      updatePropertiesForm();
+      compileGlobalCSS();
+    }
+
+    function deleteLayer(id) {
+      if (state.layers.length <= 1) return;
+      state.layers = state.layers.filter(l => l.id !== id);
+      if (state.selectedLayerId === id) {
+        state.selectedLayerId = state.layers[0].id;
+        state.selectedPercent = 0;
+      }
+      
+      syncSandboxHTMLLayers();
+      renderLayers();
+      updatePropertiesForm();
+      compileGlobalCSS();
+    }
+
+    // Insert keyframe at selected playhead
+    addKfBtn.addEventListener('click', () => {
+      const activeLayer = state.layers.find(l => l.id === state.selectedLayerId);
+      if (!activeLayer) return;
+
+      const pct = state.currentPlayhead;
+      // Copy parameters from closest matching boundary
+      const baseKeyframe = activeLayer.keyframes[pct] || 
+        activeLayer.keyframes["0"] || 
+        { x: 0, y: 0, scale: 1, rotate: 0, opacity: 1, blur: 0, mod: 0, color: "#ffffff" };
+      
+      activeLayer.keyframes[pct] = JSON.parse(JSON.stringify(baseKeyframe));
+      state.selectedPercent = pct;
+      
+      renderLayers();
+      updatePropertiesForm();
+      compileGlobalCSS();
+    });
+
+    // Remove targeted keyframe
+    delKfBtn.addEventListener('click', () => {
+      const activeLayer = state.layers.find(l => l.id === state.selectedLayerId);
+      if (!activeLayer) return;
+      if (state.selectedPercent === 0 || state.selectedPercent === 100) return; // Prevent deleting defaults
+
+      delete activeLayer.keyframes[state.selectedPercent];
+      state.selectedPercent = 0;
+      
+      renderLayers();
+      updatePropertiesForm();
+      compileGlobalCSS();
+    });
+
+    // Populate visual previews inside Center Sandbox
+    function syncSandboxHTMLLayers() {
+      visualSandbox.innerHTML = '';
+      state.layers.forEach(layer => {
+        const div = document.createElement('div');
+        div.id = `visual-${layer.id}`;
+        
+        if (layer.type === 'text') {
+          div.className = "absolute leading-none font-extrabold select-none transition-transform pointer-events-none text-4xl whitespace-nowrap";
+          div.innerText = layer.content;
+        } else {
+          div.className = "absolute w-28 h-28 border border-white/20 select-none pointer-events-none";
+        }
+        
+        visualSandbox.appendChild(div);
+      });
+    }
+
+    // Interpolation utility when scrubber is manually dragged (without CSS animations running)
+    function applyUniversalPropertiesOffsetStateToDOM(percent) {
+      state.layers.forEach(layer => {
+        const keys = Object.keys(layer.keyframes).map(Number).sort((a,b)=>a-b);
+        let leftKey = keys[0];
+        let rightKey = keys[keys.length - 1];
+
+        for (let i = 0; i < keys.length; i++) {
+          if (keys[i] <= percent) leftKey = keys[i];
+          if (keys[i] >= percent) {
+            rightKey = keys[i];
+            break;
+          }
+        }
+
+        const el = document.getElementById(`visual-${layer.id}`);
+        if (!el) return;
+
+        let leftKf = layer.keyframes[leftKey];
+        let rightKf = layer.keyframes[rightKey];
+        let progress = 0;
+
+        if (rightKey !== leftKey) {
+          progress = (percent - leftKey) / (rightKey - leftKey);
+        }
+
+        const blendNum = (p1, p2) => p1 + progress * (p2 - p1);
+
+        // Blended property values
+        const scale = blendNum(leftKf.scale, rightKf.scale);
+        const rotate = blendNum(leftKf.rotate, rightKf.rotate);
+        const x = blendNum(leftKf.x, rightKf.x);
+        const y = blendNum(leftKf.y, rightKf.y);
+        const opacity = blendNum(leftKf.opacity, rightKf.opacity);
+        const blur = blendNum(leftKf.blur, rightKf.blur);
+        const mod = blendNum(leftKf.mod, rightKf.mod);
+
+        el.style.transform = `translate(${x}px, ${y}px) rotate(${rotate}deg) scale(${scale})`;
+        el.style.opacity = opacity;
+        el.style.filter = `blur(${blur}px)`;
+        
+        if (layer.type === 'text') {
+          el.style.color = leftKf.color;
+          el.style.letterSpacing = `${mod / 4}px`;
+        } else {
+          el.style.backgroundColor = leftKf.color;
+          el.style.borderRadius = `${mod}%`;
+        }
+      });
+    }
+
+    // Compile CSS code stylesheet
+    function compileGlobalCSS() {
+      const runtimeCSS = buildAnimationBundle((layer) => `#visual-${layer.id}`);
+
+      // Inject dynamically to DOM
+      if (state.isPlaying) {
+        sheets.innerHTML = runtimeCSS;
+      } else {
+        sheets.innerHTML = '';
+        applyUniversalPropertiesOffsetStateToDOM(state.currentPlayhead);
+      }
+
+      outputCssBox.innerText = buildExportMarkup(state.exportFormat);
+    }
+
+    // Playback State Engine Toggle
+    function togglePlayback() {
+      state.isPlaying = !state.isPlaying;
+      syncPlaybackButton();
+      compileGlobalCSS();
+      if (!state.isPlaying) {
+        applyUniversalPropertiesOffsetStateToDOM(state.currentPlayhead);
+      }
+    }
+
+    playBtn.addEventListener('click', togglePlayback);
+
+    // Duration speed controller updates
+    durationInput.addEventListener('input', (e) => {
+      state.duration = parseFloat(e.target.value);
+      durationLabel.innerText = `${state.duration.toFixed(1)}s`;
+      compileGlobalCSS();
+    });
+
+    resetConfigBtn.addEventListener('click', () => {
+      state.duration = 3.5;
+      state.isPlaying = true;
+      state.currentPlayhead = 0;
+      state.selectedPercent = 0;
+      state.layers = cloneLayers(defaultLayers);
+      state.selectedLayerId = state.layers[0].id;
+      durationInput.value = state.duration;
+      durationLabel.innerText = `${state.duration.toFixed(1)}s`;
+      masterPlayheadLabel.innerText = '0%';
+      const scrubber = document.getElementById('timelineScrubCursor');
+      if (scrubber) scrubber.style.left = '0%';
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+      syncPlaybackButton();
+      syncSandboxHTMLLayers();
+      renderLayers();
+      updatePropertiesForm();
+      compileGlobalCSS();
+    });
+
+    // Copy compilation result CSS helper
+    document.getElementById('copyCssBtn').addEventListener('click', () => {
+      navigator.clipboard.writeText(outputCssBox.innerText);
+      const btn = document.getElementById('copyCssBtn');
+      btn.innerText = "COPIED!";
+      btn.className = "bg-emerald-600 font-bold text-[10px] uppercase py-1 px-2.5 rounded text-white";
+      setTimeout(() => {
+        btn.innerText = getExportCopyLabel();
+        btn.className = "bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] uppercase py-1 px-2.5 rounded transition";
+      }, 1500);
+    });
+
+    exportTabButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        setExportFormat(button.dataset.exportFormat);
+      });
+    });
+
+    // State URL Sharing configuration payload parser
+    document.getElementById('shareConfigBtn').addEventListener('click', () => {
+      const payload = {
+        layers: state.layers,
+        duration: state.duration,
+        selectedPercent: state.selectedPercent
+      };
+      const hash = btoa(JSON.stringify(payload));
+      history.pushState(null, null, "#" + hash);
+      navigator.clipboard.writeText(window.location.href);
+
+      const shareBtn = document.getElementById('shareConfigBtn');
+      shareBtn.innerHTML = "Linked Copied!";
+      setTimeout(() => {
+        shareBtn.innerHTML = `
+          <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 10.742l5.064-2.532m0 5.564l-5.064-2.532M21 12a3 3 0 11-6 0 3 3 0 016 0zm-11-4a3 3 0 11-6 0 3 3 0 016 0zm0 8a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          Share Sandbox
+        `;
+      }, 1500);
+    });
+
+    function loadSharedState() {
+      try {
+        const hash = window.location.hash.substring(1);
+        if (hash) {
+          const parsed = JSON.parse(atob(hash));
+          if (parsed.layers) {
+            state.layers = parsed.layers;
+            state.selectedLayerId = state.layers[0].id;
+          }
+          if (parsed.duration) {
+            state.duration = parsed.duration;
+            durationInput.value = parsed.duration;
+            durationLabel.innerText = `${parsed.duration}s`;
+          }
+        }
+      } catch (err) {
+        console.warn("Invalid import syntax parameter fallback.", err);
+      }
+    }
+
+    // Trigger Initializer listeners
+    layersAddTextBtn.onclick = () => addLayer('text');
+    layersAddShapeBtn.onclick = () => addLayer('box');
+
+    const wordmark = document.querySelector('.bbh-bartle-regular');
+    const wordmarkLetters = Array.from(document.querySelectorAll('.wordmark-letter'));
+
+    if (wordmark && wordmarkLetters.length) {
+      wordmark.addEventListener('pointermove', (event) => {
+        wordmark.classList.add('is-interacting');
+        wordmarkLetters.forEach((letter) => {
+          const rect = letter.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const distance = Math.abs(event.clientX - centerX);
+          const strength = Math.max(0, 1 - distance / 34);
+          const direction = event.clientX < centerX ? 1 : -1;
+          letter.style.setProperty('--lift', strength.toFixed(3));
+          letter.style.setProperty('--tone', strength.toFixed(3));
+          letter.style.setProperty('--lean', (direction * strength).toFixed(3));
+        });
+      });
+
+      wordmark.addEventListener('pointerleave', () => {
+        wordmark.classList.remove('is-interacting');
+        wordmarkLetters.forEach((letter) => {
+          letter.style.setProperty('--lift', '0');
+          letter.style.setProperty('--tone', '0');
+          letter.style.setProperty('--lean', '0');
+        });
+      });
+    }
+
+    // Run Engine
+    loadSharedState();
+    initRuler();
+    syncSandboxHTMLLayers();
+    renderLayers();
+    updatePropertiesForm();
+    syncPlaybackButton();
+    syncExportTabs();
+    compileGlobalCSS();
+  </script>
+</body>
+</html>

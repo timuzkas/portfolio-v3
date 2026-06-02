@@ -741,6 +741,7 @@
                     width: min(260px, 76vw);
                     min-width: 0;
                     margin-top: 1.2rem;
+                    margin-inline: auto;
                 }
             }
         </style>
@@ -1736,26 +1737,32 @@
                 projectDesc.textContent = project.description;
             }
 
-            function switchProject(direction) {
+            function switchProject(direction, options = {}) {
+                const { animateExit = true } = options;
                 const card = projectCard;
 
-                card.animate(
-                    [
-                        {
-                            transform: `translate3d(${cardDrag.x}px, ${cardDrag.y}px,0) rotateZ(${cardDrag.x * 0.05}deg)`,
-                            opacity: 1,
-                        },
-                        {
-                            transform: `translate3d(${direction * -220}px,-20px,0) rotateZ(${direction * -18}deg)`,
-                            opacity: 0,
-                        },
-                    ],
-                    {
-                        duration: 260,
-                        easing: "cubic-bezier(0.16,1,0.3,1)",
-                        fill: "forwards",
-                    },
-                ).finished.then(() => {
+                const exitAnimation = animateExit
+                    ? card.animate(
+                          [
+                              {
+                                  transform: `translate3d(${cardDrag.x}px, ${cardDrag.y}px,0) rotateZ(${cardDrag.x * 0.05}deg)`,
+                                  opacity: 1,
+                              },
+                              {
+                                  transform: `translate3d(${direction * -220}px,-20px,0) rotateZ(${direction * -18}deg)`,
+                                  opacity: 0,
+                              },
+                          ],
+                          {
+                              duration: 260,
+                              easing: "cubic-bezier(0.16,1,0.3,1)",
+                              fill: "forwards",
+                          },
+                      ).finished
+                    : Promise.resolve();
+
+                exitAnimation.then(() => {
+                    card.style.opacity = "0";
                     activeProject =
                         (activeProject + direction + projects.length) %
                         projects.length;
@@ -1763,8 +1770,6 @@
                     renderProject();
 
                     card.getAnimations().forEach((anim) => anim.cancel());
-
-                    card.style.opacity = "0";
 
                     requestAnimationFrame(() => {
                         const incomingAnim = card.animate(
@@ -1927,11 +1932,11 @@
                             {
                                 duration: 260,
                                 easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+                                fill: "forwards",
                             },
                         )
                         .finished.then(() => {
-                            switchProject(direction);
-                            resetCardDrag();
+                            switchProject(direction, { animateExit: false });
                         });
                 } else if (!cardDrag.moved) {
                     resetCardDrag();

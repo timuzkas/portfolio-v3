@@ -36,6 +36,7 @@
             })();
         </script>
         <title>timuzkas</title>
+        <script src="data.js"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -140,30 +141,59 @@
                     text-shadow 0.28s ease;
             }
 
-            .subtitle-egg::after {
+            .subtitle-egg::after,
+            .footer-link::after {
                 content: attr(data-egg);
                 position: absolute;
                 left: 50%;
-                bottom: calc(100% + 0.35rem);
+                bottom: calc(100% + 0.6rem);
                 z-index: 4;
                 opacity: 0;
-                padding: 0.3rem 0.45rem 0.26rem;
-                border: 1px solid rgba(17, 17, 17, 0.14);
-                border-radius: 999px;
-                background: rgba(255, 255, 255, 0.92);
-                color: rgba(17, 17, 17, 0.88);
-                font-size: 0.67em;
-                font-weight: 900;
-                letter-spacing: 0.08em;
-                line-height: 1;
-                text-transform: uppercase;
+                padding: 0.42rem 0.65rem 0.45rem;
+                border: 1px solid rgba(17, 17, 17, 0.12);
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.95);
+                color: rgba(17, 17, 17, 0.9);
+                font-size: 0.72em;
+                font-weight: 700;
+                letter-spacing: 0.01em;
+                line-height: 1.15;
+                text-transform: none;
                 white-space: nowrap;
-                box-shadow: 0 12px 20px rgba(17, 17, 17, 0.08);
+                box-shadow: 0 14px 30px rgba(17, 17, 17, 0.12);
                 pointer-events: none;
-                transform: translate(-50%, -6px) rotate(-1deg);
+                transform: translate(-50%, 4px) scale(0.95);
                 transition:
-                    opacity 0.24s ease,
-                    transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+                    opacity 0.2s ease,
+                    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .footer-link::after {
+                content: "simpler version";
+                padding-right: 1.9rem;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 9 5 12 1.8-5.2L21 14Z'/%3E%3Cpath d='M7.2 2.2 8 5.1'/%3E%3Cpath d='m5.1 8-2.9-.8'/%3E%3Cpath d='M14 4.1 12 6'/%3E%3Cpath d='m6 12-1.9 2'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 0.5rem center;
+                background-size: 14px 14px;
+            }
+
+            .subtitle-egg::before,
+            .footer-link::before {
+                content: "";
+                position: absolute;
+                left: 50%;
+                bottom: calc(100% + 0.6rem);
+                z-index: 4;
+                margin-left: -5px;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 6px solid rgba(255, 255, 255, 0.95);
+                opacity: 0;
+                transform: translateY(4px);
+                transition:
+                    opacity 0.2s ease,
+                    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+                pointer-events: none;
             }
 
             .subtitle-egg:hover {
@@ -173,9 +203,10 @@
                 text-shadow: 0 0 0.7rem rgba(255, 255, 255, 0.18);
             }
 
-            .subtitle-egg:hover::after {
+            .subtitle-egg:hover::after,
+            .subtitle-egg:hover::before {
                 opacity: 1;
-                transform: translate(-50%, 0) rotate(-1deg);
+                transform: translate(-50%, 0);
             }
 
             .intro {
@@ -718,17 +749,22 @@
                 letter-spacing: 0.08em;
             }
 
-            .footer > span {
+            .footer-link {
                 position: relative;
                 display: inline-flex;
                 gap: 0.01em;
-                padding: 0.08rem 0.2rem 0.12rem;
+                padding: 0.08rem 0.2rem 0.1rem;
+                border: 0;
+                color: inherit;
+                background: transparent;
+                text-decoration: none;
                 transition:
                     color 0.35s ease,
                     transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             }
 
             .footer-letter {
+                position: relative;
                 display: inline-block;
                 min-width: 0.28em;
                 transform: translate(var(--run-x, 0), var(--run-y, 0))
@@ -739,13 +775,46 @@
                 pointer-events: none;
             }
 
-            .footer > span:hover {
-                color: var(--fg);
-                transform: translateY(-3px);
+            .footer-letter::after {
+                content: "";
+                position: absolute;
+                left: -0.16em;
+                right: -0.16em;
+                bottom: -0.18rem;
+                height: 2px;
+                background: repeating-linear-gradient(
+                    90deg,
+                    currentColor 0 5px,
+                    transparent 5px 8px
+                );
+                color: rgba(17, 17, 17, 0.3);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
             }
 
-            .footer > span:hover .footer-letter {
+            .footer-link:hover {
+                color: var(--fg);
+                transform: translateY(-3px);
+                cursor: pointer;
+            }
+
+            .footer-link:hover::after,
+            .footer-link:hover::before {
+                opacity: 1;
+                transform: translate(
+                        calc(-50% + var(--tip-x, 0px)),
+                        0
+                    )
+                    rotate(var(--tip-rot, 0deg));
+            }
+
+            .footer-link:hover .footer-letter {
                 color: rgba(17, 17, 17, 0.72);
+            }
+
+            .footer-link:hover .footer-letter::after {
+                opacity: 1;
             }
 
             @media (max-width: 860px) {
@@ -793,11 +862,24 @@
                 border-bottom-color: rgba(242, 244, 248, 0.24);
             }
 
-            .subtitle-egg::after {
+            .subtitle-egg::after,
+            .footer-link::after {
                 border-color: rgba(242, 244, 248, 0.16);
                 background: rgba(21, 24, 32, 0.94);
                 color: rgba(242, 244, 248, 0.9);
-                box-shadow: 0 12px 20px rgba(0, 0, 0, 0.28);
+                box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+            }
+
+            .footer-link::after {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f2f4f8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 9 5 12 1.8-5.2L21 14Z'/%3E%3Cpath d='M7.2 2.2 8 5.1'/%3E%3Cpath d='m5.1 8-2.9-.8'/%3E%3Cpath d='M14 4.1 12 6'/%3E%3Cpath d='m6 12-1.9 2'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 0.5rem center;
+                background-size: 14px 14px;
+            }
+
+            .subtitle-egg::before,
+            .footer-link::before {
+                border-top-color: rgba(21, 24, 32, 0.94);
             }
 
             .subtitle-egg:hover {
@@ -914,15 +996,25 @@
                 color: rgba(242, 244, 248, 0.46);
             }
 
-            .footer > span:hover .footer-letter {
+            .footer-link:hover .footer-letter::after {
+                color: rgba(242, 244, 248, 0.36);
+            }
+
+            .footer-link:hover .footer-letter {
                 color: rgba(242, 244, 248, 0.78);
             }
 
-            .theme-toggle {
+            .site-controls {
                 position: fixed;
                 top: 1rem;
                 right: 1rem;
                 z-index: 200;
+                display: flex;
+                align-items: center;
+                gap: 0.45rem;
+            }
+
+            .theme-toggle {
                 display: grid;
                 width: 2rem;
                 height: 2rem;
@@ -968,77 +1060,201 @@
             .theme-toggle:active svg {
                 transform: rotate(180deg) scale(0.82);
             }
+
+            .beta-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+                height: 2rem;
+                padding: 0 0.7rem;
+                overflow: hidden;
+                isolation: isolate;
+                border: 1px solid rgba(242, 244, 248, 0.18);
+                border-radius: 999px;
+                background: rgba(242, 244, 248, 0.04);
+                color: rgba(242, 244, 248, 0.72);
+                font: 600 0.65rem/1 "Syne", sans-serif;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                text-decoration: none;
+                backdrop-filter: blur(10px);
+                transition:
+                    color 0.25s ease,
+                    background 0.25s ease,
+                    border-color 0.25s ease,
+                    box-shadow 0.25s ease,
+                    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .beta-chip > * {
+                position: relative;
+                z-index: 2;
+            }
+
+            .beta-chip svg {
+                width: 0.85rem;
+                height: 0.85rem;
+                fill: none;
+                stroke: currentColor;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                stroke-width: 1.7;
+                transform-origin: 50% 65%;
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .beta-chip::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                z-index: 0;
+                pointer-events: none;
+                opacity: 0;
+                transform: translateY(80%) scale(0.75);
+                background: radial-gradient(
+                    ellipse at 38% 100%,
+                    rgba(105, 255, 171, 0.3),
+                    rgba(65, 190, 125, 0.12) 48%,
+                    transparent 72%
+                );
+            }
+
+            .beta-chip::after {
+                content: "";
+                position: absolute;
+                inset: -7px;
+                z-index: 1;
+                pointer-events: none;
+                opacity: 0;
+                transform: translateX(-180%) skewX(-18deg);
+                background: linear-gradient(
+                    90deg,
+                    transparent 32%,
+                    rgba(235, 255, 242, 0.55) 50%,
+                    transparent 68%
+                );
+                filter: blur(3px);
+            }
+
+            .beta-chip:hover,
+            .beta-chip:focus-visible {
+                color: rgba(242, 244, 248, 0.95);
+                background: rgba(242, 244, 248, 0.09);
+                border-color: rgba(242, 244, 248, 0.4);
+                box-shadow:
+                    0 0 0 1px rgba(242, 244, 248, 0.08),
+                    0 8px 24px rgba(0, 0, 0, 0.5);
+                outline: none;
+                transform: translateY(-2px);
+            }
+
+            .beta-chip:hover svg,
+            .beta-chip:focus-visible svg {
+                animation: beta-flask 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .beta-chip:hover::before,
+            .beta-chip:focus-visible::before {
+                animation: beta-bloom 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .beta-chip:hover::after,
+            .beta-chip:focus-visible::after {
+                animation: beta-sheen 0.7s 0.08s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .beta-chip:active {
+                transform: translateY(0) scale(0.96);
+            }
+
+            @keyframes beta-flask {
+                0% {
+                    transform: rotate(0) scale(1);
+                }
+                38% {
+                    transform: rotate(-10deg) scale(1.12);
+                }
+                68% {
+                    transform: rotate(6deg) scale(1.08);
+                }
+                100% {
+                    transform: rotate(0) scale(1);
+                }
+            }
+
+            @keyframes beta-bloom {
+                0% {
+                    transform: translateY(80%) scale(0.75);
+                    opacity: 0;
+                }
+                45% {
+                    opacity: 0.9;
+                }
+                100% {
+                    transform: translateY(-10%) scale(1.2);
+                    opacity: 0;
+                }
+            }
+
+            @keyframes beta-sheen {
+                0% {
+                    transform: translateX(-180%) skewX(-18deg);
+                    opacity: 0;
+                }
+                28% {
+                    opacity: 0.8;
+                }
+                100% {
+                    transform: translateX(180%) skewX(-18deg);
+                    opacity: 0;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .beta-chip,
+                .beta-chip svg,
+                .beta-chip::before,
+                .beta-chip::after {
+                    animation: none !important;
+                    transition-duration: 0.01ms;
+                }
+            }
         </style>
     </head>
     <body>
-        <button
-            class="theme-toggle"
-            id="theme-toggle"
-            type="button"
-            aria-label="Switch to light mode"
-            title="Switch to light mode"
-        >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="12" cy="12" r="3.5"></circle>
-                <path d="M12 2.5v2M12 19.5v2M4.58 4.58l1.42 1.42M18 18l1.42 1.42M2.5 12h2M19.5 12h2M4.58 19.42L6 18M18 6l1.42-1.42"></path>
-            </svg>
-        </button>
+        <div class="site-controls">
+            <a
+                class="beta-chip"
+                href="beta.html"
+                aria-label="Open the beta experiment"
+                title="beta / experiment"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9 3h6M10 3v5l-5.5 9.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-3.5L14 8V3"></path>
+                    <path d="M7.5 15h9"></path>
+                </svg>
+                beta
+            </a>
+            <button
+                class="theme-toggle"
+                id="theme-toggle"
+                type="button"
+                aria-label="Switch to light mode"
+                title="Switch to light mode"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="3.5"></circle>
+                    <path d="M12 2.5v2M12 19.5v2M4.58 4.58l1.42 1.42M18 18l1.42 1.42M2.5 12h2M19.5 12h2M4.58 19.42L6 18M18 6l1.42-1.42"></path>
+                </svg>
+            </button>
+        </div>
         <main class="page">
             <section class="hero" aria-label="timuzkas fluid hero">
                 <canvas id="c"></canvas>
                 <div class="below-title">
                     <div class="intro">
-                        <p class="subtitle" id="subtitle">
-                            hello. i'm a fullstack developer, musician and an
-                            artist. i love making fun stuff, and especially
-                            making smooth animations. i'm mostly doing backend
-                            work right now, but i also quite enjoy doing UI.
-                            Open for work.
-                        </p>
-                        <nav class="socials" aria-label="Social links">
-                            <a
-                                class="social-link"
-                                href="https://github.com/timuzkas"
-                                target="_blank"
-                                rel="noopener"
-                                style="
-                                    --card-a: rgba(0, 226, 255, 0.34);
-                                    --card-b: rgba(255, 54, 208, 0.28);
-                                "
-                                ><span>github</span><span>-&gt;</span></a
-                            >
-                            <a
-                                class="social-link"
-                                href="https://gitlab.com/timuzkas"
-                                target="_blank"
-                                rel="noopener"
-                                style="
-                                    --card-a: rgba(173, 255, 47, 0.32);
-                                    --card-b: rgba(0, 170, 255, 0.26);
-                                "
-                                ><span>gitlab</span><span>-&gt;</span></a
-                            >
-                            <a
-                                class="social-link"
-                                href="https://discord.com/users/timuzkas"
-                                target="_blank"
-                                rel="noopener"
-                                style="
-                                    --card-a: rgba(255, 180, 0, 0.34);
-                                    --card-b: rgba(93, 92, 255, 0.24);
-                                "
-                                ><span>discord</span><span>-&gt;</span></a
-                            >
-                            <a
-                                class="social-link"
-                                href="mailto:ad.humpback456@passinbox.com"
-                                style="
-                                    --card-a: rgba(255, 105, 180, 0.32);
-                                    --card-b: rgba(255, 214, 102, 0.24);
-                                "
-                                ><span>email</span><span>-&gt;</span></a
-                            >
-                        </nav>
+                        <p class="subtitle" id="subtitle"></p>
+                        <nav class="socials" aria-label="Social links"></nav>
                     </div>
                     <aside class="deck" aria-label="Project deck">
                         <div class="deck-meta">
@@ -1078,7 +1294,13 @@
                 </div>
             </section>
             <footer class="footer">
-                <span>timuzkas / 2026 / :&gt;</span>
+                <a
+                    class="footer-link"
+                    href="simple.html"
+                    aria-label="Open the simpler version of this page"
+                >
+                    <span>timuzkas / 2026 / :&gt;</span>
+                </a>
             </footer>
         </main>
 
@@ -1094,191 +1316,7 @@
             const canvas = document.getElementById("c");
             const ctx = canvas.getContext("2d");
             const text = "timuzkas";
-            const projects = [
-                {
-                    title: "tbin",
-                    description: "Fast pastebin + file sharing",
-                    url: "https://github.com/timuzkas/tbin",
-                    tech: ["web", "2025"],
-                    colors: [
-                        "rgba(0, 226, 255, 0.22)",
-                        "rgba(255, 54, 208, 0.2)",
-                    ],
-                },
-                {
-                    title: "vnsee",
-                    description:
-                        "VNC gateway and an secure, multiuser online viewer.",
-                    url: "https://vnsee.timuzkas.xyz",
-                    tech: ["web", "2026"],
-                    colors: [
-                        "rgba(173, 255, 47, 0.22)",
-                        "rgba(0, 170, 255, 0.18)",
-                    ],
-                },
-                {
-                    title: "semiplay",
-                    description: "Online music client with room sync",
-                    url: "https://github.com/timuzkas/semiplay",
-                    tech: ["web", "2026"],
-                    colors: [
-                        "rgba(255, 180, 0, 0.24)",
-                        "rgba(93, 92, 255, 0.18)",
-                    ],
-                },
-                {
-                    title: "typero",
-                    description: "Browser-server typing trainer",
-                    url: "https://github.com/timuzkas/typero",
-                    tech: ["c++", "2025"],
-                    colors: [
-                        "rgba(255, 105, 180, 0.22)",
-                        "rgba(0, 226, 255, 0.18)",
-                    ],
-                },
-                {
-                    title: "creapack",
-                    description: "Package manager for CC:Tweaked",
-                    url: "https://gitlab.com/monosoft2/creapack",
-                    tech: ["lua", "2024"],
-                    colors: [
-                        "rgba(0, 170, 255, 0.22)",
-                        "rgba(255, 180, 0, 0.18)",
-                    ],
-                },
-                {
-                    title: "TextUI",
-                    description: "UI framework for CC:Tweaked",
-                    url: "https://gitlab.com/monosoft2/monoui/textui",
-                    tech: ["lua", "2024"],
-                    colors: [
-                        "rgba(173, 255, 47, 0.22)",
-                        "rgba(255, 54, 208, 0.18)",
-                    ],
-                },
-                {
-                    title: "musiclo",
-                    description: "CC:Tweaked music player with sync",
-                    url: "https://gitlab.com/monosoft2/musiclo",
-                    tech: ["lua", "2024"],
-                    colors: [
-                        "rgba(255, 180, 0, 0.22)",
-                        "rgba(93, 92, 255, 0.18)",
-                    ],
-                },
-                {
-                    title: "pTunnel",
-                    description: "Tunneling utility",
-                    url: "#",
-                    priv: true,
-                    tech: ["go", "2024", "private"],
-                    colors: [
-                        "rgba(255, 105, 180, 0.2)",
-                        "rgba(173, 255, 47, 0.16)",
-                    ],
-                },
-                {
-                    title: "ctube",
-                    description: "YT player for CC:Tweaked",
-                    url: "https://github.com/timuzkas/ctube",
-                    priv: true,
-                    tech: ["lua", "cc:tweaked"],
-                    colors: [
-                        "rgba(255, 180, 0, 0.2)",
-                        "rgba(0, 226, 255, 0.16)",
-                    ],
-                },
-                {
-                    title: "nairo",
-                    description: "CC:Tweaked file sync for easier development",
-                    url: "https://github.com/timuzkas/nairo",
-                    tech: ["go", "cc:tweaked"],
-                    colors: [
-                        "rgba(173, 255, 47, 0.2)",
-                        "rgba(93, 92, 255, 0.16)",
-                    ],
-                },
-                {
-                    title: "luxweb",
-                    description: "C++23 web framework?",
-                    url: "https://lux.timuzkas.xyz",
-                    tech: ["c++23", "web"],
-                    colors: [
-                        "rgba(0, 170, 255, 0.2)",
-                        "rgba(255, 54, 208, 0.16)",
-                    ],
-                },
-                {
-                    title: "nanorepo",
-                    description: "Small C++ / HTML media repository",
-                    url: "https://github.com/timuzkas/nanorepo",
-                    tech: ["c++", "2025"],
-                    colors: [
-                        "rgba(0, 226, 255, 0.2)",
-                        "rgba(255, 180, 0, 0.18)",
-                    ],
-                },
-                {
-                    title: "diaro",
-                    description: "Language learning app",
-                    url: "https://github.com/timuzkas/diara",
-                    tech: ["ts", "2025"],
-                    colors: [
-                        "rgba(173, 255, 47, 0.2)",
-                        "rgba(93, 92, 255, 0.18)",
-                    ],
-                },
-                {
-                    title: "vocalo",
-                    description: "Word-learning app in C++ + HTML",
-                    url: "https://github.com/timuzkas/vocalo",
-                    tech: ["c++", "2026"],
-                    colors: [
-                        "rgba(255, 54, 208, 0.2)",
-                        "rgba(0, 170, 255, 0.16)",
-                    ],
-                },
-                {
-                    title: "tlog",
-                    description: "Minimal log library with tracing",
-                    url: "https://github.com/timuzkas/tlog",
-                    tech: ["c++", "2026"],
-                    colors: [
-                        "rgba(255, 180, 0, 0.2)",
-                        "rgba(0, 226, 255, 0.16)",
-                    ],
-                },
-                {
-                    title: "wldc",
-                    description: "Discord whitelist bot for Minecraft",
-                    url: "https://gitlab.com/timuzkas/wldc",
-                    tech: ["java", "2024"],
-                    colors: [
-                        "rgba(93, 92, 255, 0.2)",
-                        "rgba(255, 105, 180, 0.16)",
-                    ],
-                },
-                {
-                    title: "portfolio",
-                    description: "This website.",
-                    url: "https://github.com/timuzkas/portfolio-v3",
-                    tech: ["html", "2026"],
-                    colors: [
-                        "rgba(173, 255, 47, 0.2)",
-                        "rgba(255, 54, 208, 0.16)",
-                    ],
-                },
-                {
-                    title: "x16-PRos",
-                    description: "Implemented malloc in it.",
-                    url: "https://github.com/PRoX2011/x16-PRos",
-                    tech: ["asm", "2026"],
-                    colors: [
-                        "rgba(0, 170, 255, 0.2)",
-                        "rgba(255, 180, 0, 0.16)",
-                    ],
-                },
-            ];
+            const projects = PORTFOLIO.projects;
 
             const pointer = {
                 x: 0,
@@ -1323,6 +1361,17 @@
             const simCanvas = document.createElement("canvas");
             const simCtx = simCanvas.getContext("2d");
             const subtitle = document.getElementById("subtitle");
+            subtitle.textContent = PORTFOLIO.bio.subtitle;
+            document.querySelector(".socials").innerHTML = PORTFOLIO.socials
+                .map(
+                    (social) => `<a
+                        class="social-link"
+                        href="${social.url}"
+                        ${social.external ? 'target="_blank" rel="noopener"' : ""}
+                        style="--card-a: ${social.colors[0]}; --card-b: ${social.colors[1]};"
+                        ><span>${social.label}</span><span>-&gt;</span></a>`,
+                )
+                .join("");
             const deckCount = document.getElementById("deck-count");
             const projectCard = document.getElementById("project-card");
             const projectCornerTop = document.querySelector(
@@ -1337,6 +1386,7 @@
             const projectDesc = document.getElementById("project-desc");
             const socialLinks = document.querySelectorAll(".social-link");
             const footerText = document.querySelector(".footer span");
+            const footerLink = document.querySelector(".footer-link");
             let simImage;
 
             const subtitleEggs = [
@@ -2223,15 +2273,30 @@
 
                 const footerLetters =
                     footerText.querySelectorAll(".footer-letter");
-                const resetFooterLetters = () => {
+                const resetFooterDecor = () => {
                     footerLetters.forEach((letter) => {
                         letter.style.setProperty("--run-x", "0px");
                         letter.style.setProperty("--run-y", "0px");
                         letter.style.setProperty("--run-rot", "0deg");
                     });
+                    footerLink.style.setProperty("--tip-x", "0px");
+                    footerLink.style.setProperty("--tip-rot", "0deg");
                 };
 
                 footerText.addEventListener("pointermove", (event) => {
+                    const linkRect = footerLink.getBoundingClientRect();
+                    const nx =
+                        (event.clientX - linkRect.left) / linkRect.width -
+                        0.5;
+                    footerLink.style.setProperty(
+                        "--tip-x",
+                        `${(nx * 14).toFixed(2)}px`,
+                    );
+                    footerLink.style.setProperty(
+                        "--tip-rot",
+                        `${(nx * -6).toFixed(2)}deg`,
+                    );
+
                     footerLetters.forEach((letter, index) => {
                         const rect = letter.getBoundingClientRect();
                         const cx = rect.left + rect.width * 0.5;
@@ -2257,7 +2322,7 @@
                     });
                 });
 
-                footerText.addEventListener("pointerleave", resetFooterLetters);
+                footerText.addEventListener("pointerleave", resetFooterDecor);
             }
 
             window.addEventListener("pointermove", (event) => {

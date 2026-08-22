@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>timuzkas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=DM+Mono&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@500&family=Sora:wght@600;700&family=Space+Grotesk:wght@500;600&family=Unbounded:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #08090a;
+    --fg: #e9e9ec;
+    --tile-fg: #d8d5cc;
+    --display-size: 34vw;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Space Grotesk", sans-serif;
+    min-height: 100vh;
+    overflow-x: auto;
+  }
+  ::selection { background: var(--fg); color: var(--bg); }
+
+  .wordmark {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    padding: 0 4rem 6rem;
+    transform-origin: left top;
+    touch-action: pan-x;
+  }
+  .landing-meta {
+    position: fixed;
+    z-index: 4;
+    top: clamp(1.5rem, 4vw, 3.75rem);
+    left: clamp(1.25rem, 4vw, 4rem);
+    width: min(33rem, 46vw);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.4rem;
+    align-items: start;
+    color: rgba(233, 233, 236, 0.66);
+    transition: opacity 0.35s ease, transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .landing-intro {
+    font-size: clamp(0.94rem, 1.15vw, 1.1rem);
+    line-height: 1.45;
+    text-wrap: pretty;
+  }
+  .landing-socials {
+    display: grid;
+    gap: 0.32rem;
+    min-width: 6.4rem;
+  }
+  .landing-socials a {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.8rem;
+    padding: 0.22rem 0.32rem;
+    color: rgba(233, 233, 236, 0.62);
+    border-bottom: 1px solid transparent;
+    font: 0.82rem/1.45 "DM Mono", monospace;
+    text-decoration: none;
+    transition: color 0.2s ease, border-color 0.2s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .landing-socials a:hover,
+  .landing-socials a:focus-visible { color: var(--fg); border-color: rgba(233, 233, 236, 0.5); transform: translateX(-0.3rem); }
+  .letters {
+    position: absolute;
+    font-family: "Unbounded", sans-serif;
+    font-weight: 700;
+    font-size: var(--display-size);
+    line-height: 0;
+    letter-spacing: -0.05em;
+    white-space: nowrap;
+    color: transparent;
+    user-select: none;
+    pointer-events: none;
+  }
+  svg.mask {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+  }
+  svg.mask text {
+    font-family: "Unbounded", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.05em;
+  }
+  .solid-wordmark {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    opacity: 0;
+    filter: blur(0);
+    transition: opacity 0.3s ease, filter 0.14s ease;
+  }
+  .solid-wordmark text {
+    fill: var(--fg);
+    font-family: "Unbounded", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.05em;
+  }
+  .wordmark .reel,
+  .wordmark .labels { transition: opacity 0.3s ease; }
+  .wordmark.solidifying .solid-wordmark { opacity: 1; }
+  .wordmark.solidifying .reel,
+  .wordmark.solidifying .labels { opacity: 0; }
+  .wordmark.project-title-live .reel,
+  .wordmark.project-title-live .labels { visibility: hidden; }
+  .wordmark.swapping .solid-wordmark { opacity: 0.58; filter: blur(0.035em); }
+  .wordmark.handoff { opacity: 0 !important; }
+
+  .reel, .labels {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    align-items: center;
+    gap: 0.5vw;
+    overflow: hidden;
+  }
+  .reel {
+    clip-path: url(#wordmask);
+    z-index: 1;
+  }
+  .labels {
+    z-index: 2;
+    overflow: hidden;
+  }
+  .reel .t-title, .reel .t-year { visibility: hidden; }
+  .labels .tile { overflow: visible; }
+  .labels .tile::after { display: none; }
+  .tile {
+    width: 13vw;
+    height: 9vw;
+    flex: 0 0 auto;
+    border-radius: 0.6vw;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.3vw;
+    padding: 0.6vw;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-radius 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease;
+  }
+  .tile:hover, .tile.hover { transform: translateY(-0.6vw) scale(1.04); border-radius: 1vw; }
+  .tile .bg, .tile .t-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .tile .bg {
+    background: var(--tile-grad);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tile .t-img {
+    object-fit: cover;
+    opacity: 0;
+    transform: scale(1.04);
+    transition: opacity 0.55s ease, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1;
+  }
+  .tile.has-img.loaded .t-img.on { opacity: 1; transform: scale(1); }
+  .tile:hover .bg, .tile.hover .bg,
+  .tile:hover .t-img, .tile.hover .t-img { transform: scale(1.12); }
+  .tile.has-img.loaded:hover .t-img.on,
+  .tile.has-img.loaded.hover .t-img.on { transform: scale(1.12); }
+  .tile .t-title,
+  .tile .t-year { position: relative; z-index: 2; margin: 0; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  .tile:hover .t-title, .tile.hover .t-title { transform: translateY(-0.15vw) scale(1.07); }
+
+  .tile.has-img:not(.loaded)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(110deg, transparent 25%, rgba(255, 255, 255, 0.14) 45%, transparent 65%);
+    background-size: 250% 100%;
+    animation: image-loading 1.1s linear infinite;
+    pointer-events: none;
+  }
+  @keyframes image-loading {
+    to { background-position: -250% 0; }
+  }
+  .tile.has-img .t-title, .tile.has-img .t-year { mix-blend-mode: difference; color: #fff; }
+  .tile .t-img.err { display: none; }
+  .tile .t-title {
+    color: var(--tile-fg);
+    font-size: 1.6vw;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .tile .t-title.f-sora { font-family: "Sora", sans-serif; font-weight: 700; font-size: 1.55vw; letter-spacing: -0.07em; }
+  .tile .t-title.f-space { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 1.65vw; letter-spacing: -0.06em; }
+  .tile .t-title.f-dm-serif { font-family: "DM Serif Display", serif; font-size: 2.05vw; }
+  .tile .t-title.f-cormorant { font-family: "Cormorant Garamond", serif; font-style: italic; font-size: 2.35vw; }
+  .tile .t-title.f-plex { font-family: "IBM Plex Mono", monospace; font-size: 1.13vw; letter-spacing: -0.07em; }
+  .tile .t-year { color: rgba(216, 213, 204, 0.45); font-family: "Space Grotesk", sans-serif; font-size: 0.8vw; }
+
+  .project-view {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 100dvh;
+    max-height: 100dvh;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y pinch-zoom;
+    overflow-anchor: none;
+    background: rgba(8, 9, 10, 0.94);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.45s ease, visibility 0s linear 0.45s;
+  }
+  .project-sheet { width: 100%; min-height: 100%; margin: 0; padding: 1.25rem clamp(1rem, 2vw, 2.25rem); padding-bottom: max(10rem, 24vh); }
+  .project-back {
+    position: fixed;
+    top: 1rem;
+    right: clamp(1rem, 2vw, 2.25rem);
+    z-index: 12;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 0;
+    border-bottom: 1px solid rgba(233, 233, 236, 0.3);
+    background: rgba(8, 9, 10, 0.78);
+    color: rgba(233, 233, 236, 0.72);
+    font: 500 0.9rem "Space Grotesk", sans-serif;
+    cursor: pointer;
+    padding: 0.4rem 0.15rem;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+  .project-back:hover { color: var(--fg); border-color: var(--fg); transform: translateY(-0.15rem); }
+  .project-heading { margin: clamp(3rem, 8vh, 6rem) 0 clamp(9rem, 30vh, 19rem); opacity: 0; transition: opacity 0.3s ease 0.2s; }
+  .project-kicker { color: rgba(233, 233, 236, 0.48); font: 0.82rem "DM Mono", monospace; }
+  .project-name { margin-top: 0.6rem; color: var(--fg); font: 700 var(--display-size)/0.8 "Unbounded", sans-serif; letter-spacing: -0.05em; display: flex; white-space: nowrap; opacity: 0; transition: opacity 0.12s ease; }
+  .project-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-auto-flow: dense; grid-auto-rows: clamp(4.25rem, 5vw, 5.5rem); gap: clamp(0.75rem, 1.25vw, 1.25rem); opacity: 0; transform: translateY(22vh); transition: opacity 0.45s ease 0.06s, transform 0.72s cubic-bezier(0.16, 1, 0.3, 1) 0.06s; }
+  .bento { position: relative; isolation: isolate; min-height: 0; padding: clamp(1.1rem, 2.4vw, 2rem); background: #121315; border: 1px solid rgba(233, 233, 236, 0.12); overflow: hidden; transition: border-color 0.32s ease, background 0.42s ease, border-radius 0.62s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.42s ease; }
+  .bento > * { position: relative; z-index: 1; }
+  .bento::before { content: ""; position: absolute; z-index: 0; inset: -35%; background: radial-gradient(circle at var(--glow-x, 80%) var(--glow-y, 15%), rgba(233, 233, 236, 0.12), transparent 34%); opacity: 0; transform: scale(0.72); transition: opacity 0.42s ease, transform 0.72s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; }
+  .bento::after { content: ""; position: absolute; z-index: 2; right: 0.8rem; bottom: 0.8rem; width: 2.2rem; height: 2.2rem; border-right: 1px solid rgba(233, 233, 236, 0.38); border-bottom: 1px solid rgba(233, 233, 236, 0.38); opacity: 0; transform: scale(0.55) translate(0.4rem, 0.4rem); transform-origin: right bottom; transition: opacity 0.3s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none; }
+  .bento:is(:hover, :focus-within) { border-color: rgba(233, 233, 236, 0.34); box-shadow: inset 0 0 0 1px rgba(233, 233, 236, 0.035); }
+  .bento:is(:hover, :focus-within)::before { opacity: 1; transform: scale(1); }
+  .bento:is(:hover, :focus-within)::after { opacity: 0.7; transform: scale(1) translate(0, 0); }
+  .shape-0 { --glow-x: 88%; --glow-y: 0%; border-radius: 0 1.4rem 0 0; }
+  .shape-1 { --glow-x: 12%; --glow-y: 100%; border-radius: 0 0 2.8rem 0; }
+  .shape-2 { --glow-x: 0%; --glow-y: 8%; border-radius: 1.8rem 0 0 0; }
+  .shape-3 { --glow-x: 100%; --glow-y: 80%; border-radius: 0; }
+  .shape-4 { --glow-x: 80%; --glow-y: 50%; border-radius: 0 2.5rem 2.5rem 0; }
+  .shape-5 { --glow-x: 8%; --glow-y: 45%; border-radius: 2.2rem 0 0 2.2rem; }
+  .shape-0:is(:hover, :focus-within) { border-radius: 0 3rem 0 0; }
+  .shape-1:is(:hover, :focus-within) { border-radius: 0 0 4rem 0; }
+  .shape-2:is(:hover, :focus-within) { border-radius: 3rem 0 0 0; }
+  .shape-3:is(:hover, :focus-within) { border-radius: 1.1rem 0 1.1rem 0; }
+  .shape-4:is(:hover, :focus-within) { border-radius: 0 3.5rem 3.5rem 0; }
+  .shape-5:is(:hover, :focus-within) { border-radius: 3.2rem 0 0 3.2rem; }
+  .bento h2 { color: rgba(233, 233, 236, 0.48); font: 500 0.88rem "Space Grotesk", sans-serif; transition: color 0.3s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+  .bento:is(:hover, :focus-within) h2 { color: rgba(233, 233, 236, 0.74); transform: translateX(0.25rem); }
+  .project-grid .bento:nth-child(3n + 1) { background: #171511; }
+  .project-grid .bento:nth-child(4n + 2) { background: #101714; }
+  .project-description { display: flex; flex-direction: column; justify-content: end; }
+  .project-description p { margin-top: 1.25rem; font-size: clamp(1.05rem, 1.8vw, 1.4rem); line-height: 1.25; }
+  .project-tech { display: flex; flex-direction: column; justify-content: space-between; }
+  .tech-icons { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 2rem; }
+  .tech-icon { display: grid; gap: 0.55rem; justify-items: center; color: rgba(233, 233, 236, 0.65); font: 0.65rem "DM Mono", monospace; }
+  .tech-icon img { width: 3.25rem; height: 3.25rem; object-fit: contain; }
+  .tech-fallback { width: 3.25rem; height: 3.25rem; display: none; place-items: center; border-radius: 1rem; background: #d8d5cc; color: #111214; font: 0.62rem "IBM Plex Mono", monospace; }
+  .project-year { display: flex; flex-direction: column; justify-content: space-between; }
+  .project-year strong { font: 700 clamp(3.5rem, 8vw, 6rem)/0.8 "Unbounded", sans-serif; letter-spacing: -0.1em; }
+  .project-media { min-height: 0; padding: 0; background: #121416; }
+  .project-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .tech-icon { transition: color 0.3s ease; }
+  .tech-icon img { transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease; }
+  .tech-icon:hover { color: var(--fg); }
+  .tech-icon:hover img { transform: translateY(-0.24rem) rotate(-2deg); filter: brightness(1.12); }
+  .project-block { display: flex; flex-direction: column; justify-content: space-between; }
+  .project-block p { margin-top: 1.5rem; color: rgba(233, 233, 236, 0.82); line-height: 1.45; }
+  .project-link { display: flex; align-items: center; justify-content: space-between; padding-block: 1rem; color: var(--fg); text-decoration: none; }
+  .project-link span { margin: 0; font: 0.9rem "DM Mono", monospace; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+  .project-link:is(:hover, :focus-visible) { background: #19141b; }
+  .project-link:is(:hover, :focus-visible) span { transform: translateX(0.45rem); }
+  body.project-open { overflow: hidden; }
+  body.project-open .wordmark { opacity: 0; transform: translateY(-12vh) scale(0.97); transition: opacity 0.35s ease, transform 0.85s cubic-bezier(0.16, 1, 0.3, 1); }
+  body.project-open .landing-meta { opacity: 0; transform: translateY(-2rem); pointer-events: none; }
+  body.project-open .project-view { opacity: 1; visibility: visible; transition-delay: 0s; }
+  body.project-open .project-heading { opacity: 1; }
+  body.project-open .project-view.content-ready .project-grid { opacity: 1; transform: translateY(0); }
+  body.title-transition .wordmark { z-index: 20; opacity: 1; }
+  body.project-open .wordmark { pointer-events: none; }
+  body.project-open.project-returning .wordmark { opacity: 1; transform: none; transition: opacity 0.42s ease; }
+  .project-view.closing { background: rgba(8, 9, 10, 0); transition: opacity 0.45s ease, visibility 0s linear 0.45s, background 0.72s ease; }
+  .project-view.closing .project-heading { opacity: 0; transition-delay: 0s; }
+  .project-view.closing .project-grid { opacity: 0; transform: translateY(28vh); transition-delay: 0s; }
+  .project-view.closing .project-back { opacity: 0; transform: translateY(-0.8rem); pointer-events: none; }
+  @media (max-width: 700px) {
+    :root { --display-size: 40vw; }
+    .wordmark { padding: 0 1rem 2.5rem; }
+    .landing-meta {
+      left: max(1rem, env(safe-area-inset-left));
+      right: auto;
+      width: calc(100vw - max(1rem, env(safe-area-inset-left)) - max(1rem, env(safe-area-inset-right)));
+      max-width: none;
+      min-width: 0;
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+    }
+    .landing-meta > * { min-width: 0; }
+    .landing-intro { max-width: 100%; font-size: clamp(0.88rem, 3.8vw, 1rem); line-height: 1.4; overflow-wrap: anywhere; }
+    .landing-socials { grid-template-columns: repeat(4, auto); justify-content: start; gap: 0.8rem; }
+    .landing-socials a { padding: 0.35rem 0.2rem; }
+    .landing-socials a span:last-child { display: none; }
+    .tile .t-title.f-sora { font-size: 0.82rem; }
+    .tile .t-title.f-space { font-size: 0.88rem; }
+    .tile .t-title.f-dm-serif { font-size: 1.08rem; }
+    .tile .t-title.f-cormorant { font-size: 1.2rem; }
+    .tile .t-title.f-plex { font-size: 0.68rem; }
+    .tile .t-year { font-size: 0.62rem; }
+    .project-sheet { padding: 1rem; padding-bottom: max(7rem, 16vh); }
+    body.project-open { height: 100dvh; overscroll-behavior: none; }
+    .project-back { top: max(0.5rem, env(safe-area-inset-top)); left: max(1rem, env(safe-area-inset-left)); right: auto; z-index: 30; min-height: 2.75rem; padding-inline: 0.55rem; background: rgba(8, 9, 10, 0.92); }
+    .project-heading { margin: 3.5rem 0 8rem; }
+    .project-kicker { font-size: 0.72rem; }
+    .project-grid { grid-auto-rows: 4.5rem; gap: 0.7rem; transform: translateY(14vh); }
+    .project-description, .project-media, .project-block, .project-link { grid-column: span 12 !important; }
+    .project-tech { grid-column: span 7 !important; }
+    .project-year { grid-column: span 5 !important; }
+    .bento { padding: 1.15rem; }
+    .project-description p { font-size: 1rem; }
+    .project-year strong { font-size: 3.5rem; }
+    .tech-icons { margin-top: 1rem; }
+    .tech-icon img, .tech-fallback { width: 2.75rem; height: 2.75rem; }
+    .project-media { min-height: 14rem; grid-row: span 3 !important; }
+    .project-link { padding-inline: 1.1rem; }
+  }
+  @media (max-width: 360px) {
+    .project-tech, .project-year { grid-column: span 12 !important; }
+  }
+  @media (hover: none) {
+    .bento::before, .bento::after { display: none; }
+    .bento:hover { box-shadow: none; }
+    .bento:hover h2 { transform: none; }
+    .tech-icon:hover img { transform: none; filter: none; }
+    .tile:hover { transform: none; border-radius: 0.6vw; }
+    .tile:hover .bg, .tile:hover .t-img { transform: scale(1); }
+    .shape-0:hover { border-radius: 0 1.4rem 0 0; }
+    .shape-1:hover { border-radius: 0 0 2.8rem 0; }
+    .shape-2:hover { border-radius: 1.8rem 0 0 0; }
+    .shape-3:hover { border-radius: 0; }
+    .shape-4:hover { border-radius: 0 2.5rem 2.5rem 0; }
+    .shape-5:hover { border-radius: 2.2rem 0 0 2.2rem; }
+  }
+</style>
+</head>
+<body>
+<aside class="landing-meta" aria-label="About and social links">
+  <p class="landing-intro">hello. i'm a fullstack developer, musician and an artist. i love making fun stuff, and especially making smooth animations. i'm mostly doing backend work right now, but i also quite enjoy doing UI. Open for work.</p>
+  <nav class="landing-socials" aria-label="Social links">
+    <a href="https://github.com/timuzkas" target="_blank" rel="noopener"><span>github</span><span>↗</span></a>
+    <a href="https://gitlab.com/timuzkas" target="_blank" rel="noopener"><span>gitlab</span><span>↗</span></a>
+    <a href="https://discord.com/users/timuzkas" target="_blank" rel="noopener"><span>discord</span><span>↗</span></a>
+    <a href="mailto:ad.humpback456@passinbox.com"><span>email</span><span>↗</span></a>
+  </nav>
+</aside>
+<div class="wordmark" id="wordmark">
+  <span class="letters" id="letters" aria-hidden="true">timuzkas.</span>
+  <svg class="mask" width="100%" height="100%" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <clipPath id="wordmask">
+        <text id="mask-text">timuzkas.</text>
+      </clipPath>
+    </defs>
+  </svg>
+  <svg class="solid-wordmark" width="100%" height="100%" preserveAspectRatio="none" aria-hidden="true">
+    <text id="solid-title">timuzkas.</text>
+  </svg>
+  <div class="reel" id="reel"></div>
+  <div class="labels" id="labels" aria-hidden="true"></div>
+</div>
+<section class="project-view" id="project-view" aria-live="polite" aria-hidden="true" tabindex="-1">
+  <div class="project-sheet">
+    <button class="project-back" id="project-back" type="button">projects ↙</button>
+    <header class="project-heading">
+      <p class="project-kicker" id="project-kicker"></p>
+      <h1 class="project-name" id="project-name"></h1>
+    </header>
+    <div class="project-grid" id="project-grid"></div>
+  </div>
+</section>
+
+<script>
+var projects = [
+  { title: "gig", tech: ["go", "gtk4"], year: "26", images: ["https://github.com/timuzkas/gig/blob/dev/screenshot.png?raw=true"] },
+  { title: "tbin", tech: ["web"], year: "25", images: [] },
+  { title: "vnsee", tech: ["web"], year: "26", images: [] },
+  { title: "semiplay", tech: ["web"], year: "26", images: ["assets/semiplay.webp"] },
+  { title: "typero", tech: ["c++"], year: "25", images: [] },
+  { title: "creapack", tech: ["lua"], year: "24", images: [] },
+  { title: "TextUI", tech: ["lua"], year: "24", images: ["https://gitlab.com/monosoft2/monoui/textui/-/raw/main/assets/2024-09-16_21.21.40.bmp"] },
+  { title: "musiclo", tech: ["lua"], year: "24", images: ["https://pinestore.cc/project/136/thumbnail_full.webp"] },
+  { title: "pTunnel", tech: ["go"], year: "24", images: [] },
+  { title: "ctube", tech: ["lua"], year: "--", images: [] },
+  { title: "nairo", tech: ["go"], year: "--", images: [] },
+  { title: "luxweb", tech: ["c++23"], year: "--", images: ["assets/luxweb.png"] },
+  { title: "nanorepo", tech: ["c++"], year: "25", images: [] },
+  { title: "diaro", tech: ["ts"], year: "25", images: [] },
+  { title: "vocalo", tech: ["c++"], year: "26", images: [] },
+  { title: "tlog", tech: ["c++"], year: "26", images: [] },
+  { title: "wldc", tech: ["java"], year: "24", images: [] },
+  { title: "portfolio", tech: ["html"], year: "26", images: [] },
+  { title: "x16-PRos", tech: ["asm"], year: "26", images: [] }
+];
+
+var projectDetails = {
+  gig: {
+    description: "A Git interface built with Go and GTK4.",
+    url: "https://github.com/timuzkas/gig",
+    blocks: [
+      { label: "the idea", text: "Keep everyday Git work close to the repository, with a native interface that stays quick and readable.", span: 7 },
+      { label: "under the hood", text: "Go owns the application logic while GTK4 handles the native window, controls, and repository views.", span: 5 }
+    ]
+  },
+  tbin: { description: "A quick pastebin and file-sharing tool.", url: "https://github.com/timuzkas/tbin" },
+  vnsee: { description: "A VNC gateway and multi-user viewer.", url: "https://vnsee.timuzkas.xyz" },
+  semiplay: { description: "An online music client with room sync.", url: "https://github.com/timuzkas/semiplay" },
+  typero: { description: "A browser-server typing trainer.", url: "https://github.com/timuzkas/typero" },
+  creapack: { description: "A package manager for CC:Tweaked.", url: "https://gitlab.com/monosoft2/creapack" },
+  TextUI: { description: "A UI framework for CC:Tweaked.", url: "https://gitlab.com/monosoft2/monoui/textui" },
+  musiclo: { description: "A CC:Tweaked music player with sync.", url: "https://gitlab.com/monosoft2/musiclo" },
+  pTunnel: { description: "A tunneling utility.", url: "" },
+  ctube: { description: "A YouTube player for CC:Tweaked.", url: "https://github.com/timuzkas/ctube" },
+  nairo: { description: "File sync for CC:Tweaked development.", url: "https://github.com/timuzkas/nairo" },
+  luxweb: { description: "A C++23 web framework experiment.", url: "https://lux.timuzkas.xyz" },
+  nanorepo: { description: "A small C++ and HTML media repository.", url: "https://github.com/timuzkas/nanorepo" },
+  diaro: { description: "A language-learning app.", url: "https://github.com/timuzkas/diara" },
+  vocalo: { description: "A word-learning app in C++ and HTML.", url: "https://github.com/timuzkas/vocalo" },
+  tlog: { description: "A minimal log library with tracing.", url: "https://github.com/timuzkas/tlog" },
+  wldc: { description: "A Discord whitelist bot for Minecraft.", url: "https://gitlab.com/monosoft2/wldc" },
+  portfolio: { description: "This website.", url: "https://github.com/timuzkas/portfolio-v3" },
+  "x16-PRos": { description: "A low-level project with a custom malloc implementation.", url: "https://github.com/PRoX2011/x16-PRos" }
+};
+projects.forEach(function (project) {
+  var detail = projectDetails[project.title] || {};
+  project.description = detail.description || "A personal software project.";
+  project.url = detail.url || "";
+  project.blocks = detail.blocks || [];
+});
+
+var gradients = [
+  "linear-gradient(135deg, #3a3d42, #1a1c1f)",
+  "linear-gradient(135deg, #40382f, #1d1915)",
+  "linear-gradient(135deg, #2a3734, #121713)",
+  "linear-gradient(135deg, #3a3036, #171217)",
+  "linear-gradient(135deg, #34342a, #14140e)",
+  "linear-gradient(135deg, #2f3640, #13171d)",
+  "linear-gradient(135deg, #3d3830, #1a1713)",
+  "linear-gradient(135deg, #2c323b, #10151b)"
+];
+var projectCardFonts = {
+  gig: "f-sora", tbin: "f-plex", vnsee: "f-cormorant", semiplay: "f-dm-serif",
+  typero: "f-sora", creapack: "f-space", TextUI: "f-plex", musiclo: "f-dm-serif",
+  pTunnel: "f-plex", ctube: "f-space", nairo: "f-cormorant", luxweb: "f-sora",
+  nanorepo: "f-space", diaro: "f-dm-serif", vocalo: "f-cormorant", tlog: "f-plex",
+  wldc: "f-space", portfolio: "f-sora", "x16-PRos": "f-plex"
+};
+
+var reel = document.getElementById("reel");
+var labels = document.getElementById("labels");
+projects.forEach(function (p, i) {
+  var tile = document.createElement("div");
+  tile.className = "tile" + (p.images && p.images.length ? " has-img" : "");
+  tile.dataset.projectIndex = String(i);
+  tile.setAttribute("role", "button");
+  tile.setAttribute("tabindex", "0");
+  tile.setAttribute("aria-label", "Open " + p.title);
+  tile.style.setProperty("--tile-grad", gradients[i % gradients.length]);
+
+  var media = '<div class="bg"></div>';
+  if (p.images && p.images.length) {
+    media += p.images.map(function (src, k) {
+      return '<img class="t-img' + (k === 0 ? " on" : "") + '" src="' + src + '" alt="' + p.title + '" loading="lazy">';
+    }).join("");
+  }
+
+  var fontClass = projectCardFonts[p.title] || "f-space";
+  var text = '<span class="t-title ' + fontClass + '">' + p.title + '</span>'
+    + '<span class="t-year">' + p.tech[0] + " " + p.year + "</span>";
+  tile.innerHTML = media + text;
+  reel.appendChild(tile);
+
+  var label = document.createElement("div");
+  label.className = tile.className;
+  label.innerHTML = text;
+  labels.appendChild(label);
+});
+
+var imageTiles = reel.querySelectorAll(".tile.has-img");
+imageTiles.forEach(function (tile, tileIndex) {
+  var imgs = tile.querySelectorAll(".t-img");
+  var first = imgs[0];
+  var settled = false;
+
+  function decide(ev) {
+    if (settled) return;
+    settled = true;
+    var img = ev.target;
+    if (img.naturalWidth === 0) {
+      tile.classList.remove("has-img");
+      img.classList.add("err");
+      tile.classList.add("loaded");
+      return;
+    }
+    tile.classList.add("loaded");
+  }
+
+  first.addEventListener("load", decide);
+  first.addEventListener("error", function (ev) {
+    if (settled) return;
+    settled = true;
+    tile.classList.remove("has-img");
+    ev.target.classList.add("err");
+    tile.classList.add("loaded");
+  });
+  if (first.complete) decide({ target: first });
+
+  if (imgs.length > 1) {
+    var i = 0;
+    setTimeout(function () {
+      setInterval(function () {
+        imgs[i].classList.remove("on");
+        i = (i + 1) % imgs.length;
+        imgs[i].classList.add("on");
+      }, 2600);
+    }, Math.random() * 1500 + tileIndex * 200);
+  }
+});
+
+var wordmark = document.getElementById("wordmark");
+var letters = document.getElementById("letters");
+var maskText = document.getElementById("mask-text");
+var solidTitle = document.getElementById("solid-title");
+
+var tiles = Array.prototype.slice.call(reel.children);
+var labelTiles = Array.prototype.slice.call(labels.children);
+var activeTile = null;
+
+function setActiveTile(tile) {
+  if (tile === activeTile) return;
+  if (activeTile) {
+    var oldIndex = tiles.indexOf(activeTile);
+    activeTile.classList.remove("hover");
+    if (labelTiles[oldIndex]) labelTiles[oldIndex].classList.remove("hover");
+  }
+  activeTile = tile;
+  if (activeTile) {
+    var newIndex = tiles.indexOf(activeTile);
+    activeTile.classList.add("hover");
+    if (labelTiles[newIndex]) labelTiles[newIndex].classList.add("hover");
+  }
+}
+
+var projectView = document.getElementById("project-view");
+var projectName = document.getElementById("project-name");
+var projectKicker = document.getElementById("project-kicker");
+var projectGrid = document.getElementById("project-grid");
+var projectBack = document.getElementById("project-back");
+var selectedProjectIndex = null;
+var transitionState = "landing";
+var titleTimers = [];
+var projectTitleOffset = { x: 0, y: 0 };
+
+function clearTitleTimers() {
+  titleTimers.forEach(function (timer) { clearTimeout(timer); });
+  titleTimers = [];
+}
+
+function titleAfter(delay, callback) {
+  var timer = setTimeout(callback, delay);
+  titleTimers.push(timer);
+  return timer;
+}
+
+function titleMotion() {
+  var compact = window.matchMedia("(max-width: 700px)").matches;
+  return {
+    start: compact ? 90 : 160,
+    move: compact ? 560 : 720,
+    swapStart: compact ? 300 : 430,
+    swapText: compact ? 370 : 520,
+    content: compact ? 700 : 920
+  };
+}
+
+function titleTransform(x, y) {
+  return "translate3d(" + x + "px," + y + "px,0)";
+}
+
+function measureProjectTitleOffset(title) {
+  var oldText = solidTitle.textContent;
+  var oldTransform = wordmark.style.transform;
+  solidTitle.textContent = title;
+  wordmark.style.transform = "none";
+  var source = solidTitle.getBoundingClientRect();
+  var target = projectName.getBoundingClientRect();
+  projectTitleOffset.x = target.left - source.left;
+  projectTitleOffset.y = target.top + projectView.scrollTop - source.top;
+  solidTitle.textContent = oldText;
+  wordmark.style.transform = oldTransform;
+}
+
+function alignLiveProjectTitle() {
+  if (selectedProjectIndex === null || transitionState !== "project") return;
+  var title = projects[selectedProjectIndex].title;
+  measureProjectTitleOffset(title);
+  solidTitle.textContent = title;
+  wordmark.style.transition = "none";
+  wordmark.style.transform = titleTransform(projectTitleOffset.x, projectTitleOffset.y - projectView.scrollTop);
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;");
+}
+
+var languageIcons = {
+  go: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/go/go-original-wordmark.svg",
+  gtk4: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/gtk/gtk-original.svg",
+  web: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg",
+  html: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg",
+  "c++": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg",
+  "c++23": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/cplusplus/cplusplus-original.svg",
+  lua: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/lua/lua-original.svg",
+  java: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg",
+  ts: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg",
+  asm: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/assembly/assembly-original.svg"
+};
+
+function shapeClass(projectIndex, itemIndex) {
+  return "shape-" + ((projectIndex * 3 + itemIndex * 5) % 6);
+}
+
+function renderTechIcons(tech) {
+  return tech.map(function (language) {
+    var icon = languageIcons[language] || "";
+    var shortName = language.slice(0, 4).toUpperCase();
+    return '<div class="tech-icon">' + (icon ? '<img src="' + icon + '" alt="' + escapeHTML(language) + ' logo"><span class="tech-fallback">' + escapeHTML(shortName) + "</span>" : '<span class="tech-fallback" style="display:grid">' + escapeHTML(shortName) + "</span>") + "<span>" + escapeHTML(language) + "</span></div>";
+  }).join("");
+}
+
+function renderProjectGrid(project, index) {
+  var itemIndex = 0;
+  var leadLayouts = [[5, 4, 3], [7, 3, 2], [6, 4, 2], [4, 5, 3]];
+  var lead = leadLayouts[index % leadLayouts.length];
+  var cards = '<article class="bento project-description ' + shapeClass(index, itemIndex++) + '" style="grid-column:span ' + lead[0] + ';grid-row:span 2"><h2>about</h2><p>' + escapeHTML(project.description) + "</p></article>";
+  cards += '<article class="bento project-tech ' + shapeClass(index, itemIndex++) + '" style="grid-column:span ' + lead[1] + ';grid-row:span 2"><h2>built with</h2><div class="tech-icons">' + renderTechIcons(project.tech) + "</div></article>";
+  cards += '<article class="bento project-year ' + shapeClass(index, itemIndex++) + '" style="grid-column:span ' + lead[2] + ';grid-row:span 2"><h2>year</h2><strong>' + escapeHTML(project.year) + "</strong></article>";
+
+  (project.images || []).forEach(function (image, imageIndex) {
+    var src = typeof image === "string" ? image : image.src;
+    var alt = typeof image === "string" ? project.title + " screenshot" : image.alt || project.title + " screenshot";
+    var hasCompanionBlocks = project.blocks && project.blocks.length;
+    var span = typeof image === "object" && image.span ? image.span : hasCompanionBlocks ? (imageIndex % 2 ? 5 : 7) : 12;
+    var rows = typeof image === "object" && image.rows ? image.rows : hasCompanionBlocks ? 4 : 8;
+    cards += '<figure class="bento project-media ' + shapeClass(index, itemIndex++) + '" style="grid-column:span ' + span + ';grid-row:span ' + rows + '"><img src="' + escapeHTML(src) + '" alt="' + escapeHTML(alt) + '" loading="lazy" decoding="async"></figure>';
+  });
+
+  (project.blocks || []).forEach(function (block) {
+    var span = project.images && project.images.length ? 5 : (block.span || 6);
+    cards += '<article class="bento project-block ' + shapeClass(index, itemIndex++) + '" style="grid-column:span ' + span + ';grid-row:span 2"><h2>' + escapeHTML(block.label || "notes") + "</h2><p>" + escapeHTML(block.text) + "</p></article>";
+  });
+
+  cards += project.url
+    ? '<a class="bento project-link ' + shapeClass(index, itemIndex) + '" style="grid-column:span 12;grid-row:span 1" href="' + escapeHTML(project.url) + '" target="_blank" rel="noopener"><h2>project link</h2><span>open project ↗</span></a>'
+    : '<div class="bento project-link ' + shapeClass(index, itemIndex) + '" style="grid-column:span 12;grid-row:span 1"><h2>project status</h2><span>private project</span></div>';
+
+  projectGrid.innerHTML = cards;
+  projectGrid.querySelectorAll(".tech-icon img").forEach(function (image) {
+    image.addEventListener("error", function () {
+      image.style.display = "none";
+      image.nextElementSibling.style.display = "grid";
+    });
+  });
+}
+
+function openProject(index, writeHistory) {
+  var project = projects[index];
+  if (!project || transitionState === "closing") return;
+  transitionState = "opening";
+  selectedProjectIndex = index;
+  projectView.setAttribute("aria-hidden", "false");
+  projectView.scrollTop = 0;
+  projectName.className = "project-name";
+  projectName.textContent = project.title;
+  projectName.setAttribute("aria-label", project.title);
+  projectKicker.textContent = project.tech[0] + " / " + project.year;
+  renderProjectGrid(project, index);
+
+  clearTitleTimers();
+  solidTitle.textContent = "timuzkas.";
+  wordmark.classList.remove("handoff", "swapping");
+  wordmark.classList.add("solidifying");
+  wordmark.style.transition = "none";
+  wordmark.style.transform = "none";
+
+  document.body.classList.add("project-open", "title-transition");
+  projectView.focus({ preventScroll: true });
+  var motion = titleMotion();
+  requestAnimationFrame(function () {
+    titleAfter(motion.start, function () {
+      measureProjectTitleOffset(project.title);
+      wordmark.style.transition = "transform " + motion.move + "ms cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease";
+      wordmark.style.transform = titleTransform(projectTitleOffset.x, projectTitleOffset.y);
+    });
+    titleAfter(motion.swapStart, function () { wordmark.classList.add("swapping"); });
+    titleAfter(motion.swapText, function () {
+      solidTitle.textContent = project.title;
+      requestAnimationFrame(function () { wordmark.classList.remove("swapping"); });
+    });
+    titleAfter(motion.content, function () {
+      projectView.classList.add("content-ready");
+      wordmark.classList.add("project-title-live");
+      wordmark.style.transition = "none";
+      transitionState = "project";
+    });
+  });
+  if (writeHistory !== false) history.pushState({ project: index }, "", "#project=" + encodeURIComponent(project.title));
+}
+
+function closeProject(writeHistory) {
+  if (selectedProjectIndex === null || transitionState === "closing") return;
+  if (writeHistory !== false && history.state && history.state.project === selectedProjectIndex) {
+    history.back();
+    return;
+  }
+  transitionState = "closing";
+  if (projectScrollFrame !== null) {
+    cancelAnimationFrame(projectScrollFrame);
+    projectScrollFrame = null;
+  }
+  var closingIndex = selectedProjectIndex;
+  clearTitleTimers();
+  var motion = titleMotion();
+  projectView.scrollTop = 0;
+  projectView.classList.remove("content-ready");
+  projectView.classList.add("closing");
+  solidTitle.textContent = projects[closingIndex].title;
+  wordmark.classList.remove("handoff", "swapping", "project-title-live");
+  wordmark.classList.add("solidifying");
+  wordmark.style.transition = "none";
+  document.body.classList.add("title-transition");
+  wordmark.style.transform = titleTransform(projectTitleOffset.x, projectTitleOffset.y);
+
+  requestAnimationFrame(function () {
+    wordmark.style.transition = "transform " + motion.move + "ms cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease";
+    wordmark.style.transform = "none";
+    titleAfter(Math.round(motion.move * 0.42), function () { wordmark.classList.add("swapping"); });
+    titleAfter(Math.round(motion.move * 0.54), function () {
+      solidTitle.textContent = "timuzkas.";
+      wordmark.classList.remove("swapping");
+    });
+    titleAfter(motion.move + 40, function () { wordmark.classList.remove("solidifying"); });
+    titleAfter(motion.move + 380, function () {
+      document.body.classList.remove("project-open", "project-returning", "title-transition");
+      projectView.setAttribute("aria-hidden", "true");
+      wordmark.classList.remove("solidifying", "handoff", "swapping", "project-title-live");
+      wordmark.style.transition = "none";
+      wordmark.style.transform = "none";
+    });
+    titleAfter(motion.move + 860, function () {
+      projectView.classList.remove("closing");
+      selectedProjectIndex = null;
+      transitionState = "landing";
+      if (tiles[closingIndex]) tiles[closingIndex].focus({ preventScroll: true });
+      if (writeHistory !== false) history.replaceState({}, "", window.location.pathname + window.location.search);
+    });
+  });
+}
+
+var projectScrollFrame = null;
+projectView.addEventListener("scroll", function () {
+  if (transitionState !== "project") return;
+  if (projectScrollFrame !== null) return;
+  projectScrollFrame = requestAnimationFrame(function () {
+    projectScrollFrame = null;
+    if (transitionState !== "project") return;
+    wordmark.style.transform = titleTransform(projectTitleOffset.x, projectTitleOffset.y - projectView.scrollTop);
+  });
+}, { passive: true });
+
+tiles.forEach(function (tile, index) {
+  tile.addEventListener("click", function () { openProject(index); });
+  tile.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openProject(index);
+    }
+  });
+});
+labelTiles.forEach(function (tile, index) {
+  tile.addEventListener("click", function () { openProject(index); });
+});
+projectBack.addEventListener("click", function () { closeProject(); });
+document.addEventListener("keydown", function (event) {
+  if (event.key === "Escape") closeProject();
+});
+function syncProjectRoute() {
+  var match = window.location.hash.match(/^#project=(.*)$/);
+  var index = match ? projects.findIndex(function (project) { return project.title === decodeURIComponent(match[1]); }) : -1;
+  if (index >= 0) openProject(index, false);
+  else closeProject(false);
+}
+window.addEventListener("popstate", syncProjectRoute);
+syncProjectRoute();
+
+wordmark.addEventListener("mousemove", function (e) {
+  var x = e.clientX, y = e.clientY;
+  var hit = null;
+  for (var i = tiles.length - 1; i >= 0; i--) {
+    var r = tiles[i].getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) {
+      hit = tiles[i];
+      break;
+    }
+  }
+  setActiveTile(hit);
+});
+wordmark.addEventListener("mouseleave", function () {
+  setActiveTile(null);
+});
+
+function layout() {
+  var cs = getComputedStyle(wordmark);
+  var ls = getComputedStyle(letters);
+  var fs = parseFloat(ls.fontSize);
+  var padLeft = parseFloat(cs.paddingLeft);
+  var padRight = parseFloat(cs.paddingRight);
+  var padBottom = parseFloat(cs.paddingBottom);
+
+  var c = document.createElement("canvas").getContext("2d");
+  c.font = "700 " + fs + "px Unbounded, sans-serif";
+  c.letterSpacing = "-0.05em";
+  var m = c.measureText("timuzkas.");
+  var w = m.width;
+  var asc = m.actualBoundingBoxAscent || fs * 0.72;
+  var desc = m.actualBoundingBoxDescent || fs * 0.2;
+
+  var topPad = Math.ceil(fs * 0.2);
+  letters.style.top = topPad + "px";
+  letters.style.left = padLeft + "px";
+
+  var baselineY = topPad + Math.round(fs * 0.55);
+  var glyphBottom = baselineY + desc;
+
+  wordmark.style.width = padLeft + w + padRight + "px";
+  wordmark.style.height = glyphBottom + padBottom + "px";
+
+  maskText.setAttribute("x", String(padLeft));
+  maskText.setAttribute("y", String(baselineY));
+  maskText.setAttribute("font-size", String(fs));
+  solidTitle.setAttribute("x", String(padLeft));
+  solidTitle.setAttribute("y", String(baselineY));
+  solidTitle.setAttribute("font-size", String(fs));
+}
+
+function sizeTilesToFill() {
+  var count = tiles.length;
+  if (!count) return;
+
+  var width = reel.clientWidth;
+  var height = reel.clientHeight;
+  var styles = getComputedStyle(reel);
+  var columnGap = parseFloat(styles.columnGap) || 0;
+  var rowGap = parseFloat(styles.rowGap) || 0;
+  var targetRatio = 13 / 9;
+  var bestRows = 1;
+  var bestScore = Infinity;
+
+  for (var rows = 1; rows <= count; rows++) {
+    var averageColumns = count / rows;
+    var cardWidth = (width - columnGap * (averageColumns - 1)) / averageColumns;
+    var cardHeight = (height - rowGap * (rows - 1)) / rows;
+    if (cardWidth <= 0 || cardHeight <= 0) continue;
+
+    var score = Math.abs(Math.log((cardWidth / cardHeight) / targetRatio));
+    if (score < bestScore) {
+      bestScore = score;
+      bestRows = rows;
+    }
+  }
+
+  var shortRow = Math.floor(count / bestRows);
+  var widerRows = count % bestRows;
+  var index = 0;
+  var tileHeight = (height - rowGap * (bestRows - 1)) / bestRows;
+
+  for (var row = 0; row < bestRows; row++) {
+    var itemsInRow = shortRow + (row < widerRows ? 1 : 0);
+    var tileWidth = (width - columnGap * (itemsInRow - 1)) / itemsInRow;
+
+    for (var item = 0; item < itemsInRow; item++, index++) {
+      [tiles[index], labelTiles[index]].forEach(function (tile) {
+        tile.style.width = Math.max(1, tileWidth - 0.02) + "px";
+        tile.style.height = Math.max(1, tileHeight - 0.02) + "px";
+      });
+    }
+  }
+}
+
+function applyLayout() {
+  var resizeFrame = null;
+  layout();
+  sizeTilesToFill();
+  document.fonts.ready.then(function () {
+    layout();
+    sizeTilesToFill();
+    alignLiveProjectTitle();
+  });
+  window.addEventListener("resize", function () {
+    if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(function () {
+      resizeFrame = null;
+      layout();
+      sizeTilesToFill();
+      alignLiveProjectTitle();
+    });
+  });
+}
+applyLayout();
+
+var scroller = document.scrollingElement;
+var smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+var target = scroller.scrollLeft;
+var ticking = false;
+var max = function () { return scroller.scrollWidth - window.innerWidth; };
+
+function step() {
+  var cur = scroller.scrollLeft;
+  var diff = target - cur;
+  if (Math.abs(diff) < 0.5) {
+    scroller.scrollLeft = target;
+    ticking = false;
+    return;
+  }
+  scroller.scrollLeft = cur + diff * 0.12;
+  requestAnimationFrame(step);
+}
+
+document.addEventListener("wheel", function (e) {
+  if (document.body.classList.contains("project-open")) return;
+  if (e.deltaY === 0 && e.deltaX === 0) return;
+  e.preventDefault();
+  target = Math.max(0, Math.min(max(), target + e.deltaY * 1.1 + e.deltaX));
+  if (smooth) {
+    if (!ticking) {
+      ticking = true;
+      step();
+    }
+  } else {
+    scroller.scrollLeft = target;
+  }
+}, { passive: false });
+
+window.addEventListener("resize", function () {
+  target = Math.min(target, max());
+});
+</script>
+</body>
+</html>

@@ -186,6 +186,16 @@
       border-radius: 0 !important;
     }
 
+    select {
+      border-radius: 0 !important;
+      color-scheme: dark;
+    }
+
+    select option {
+      background: var(--panel);
+      color: var(--fg);
+    }
+
     header,
     aside,
     footer,
@@ -771,6 +781,24 @@
         <div class="h-4 w-px bg-slate-800"></div>
 
         <div class="flex items-center gap-2">
+          <span class="text-slate-400 font-medium">Curve:</span>
+          <select id="timingCurve" class="bg-[#05070B] border border-slate-800 hover:border-slate-700 focus:border-slate-600 text-slate-300 font-medium text-[11px] py-1.5 px-2 outline-none cursor-pointer transition">
+            <option value="cubic-bezier(0.25, 1, 0.5, 1)" selected>Default (Expo Out)</option>
+            <option value="linear">Linear</option>
+            <option value="ease">Ease</option>
+            <option value="ease-in">Ease In</option>
+            <option value="ease-out">Ease Out</option>
+            <option value="ease-in-out">Ease In Out</option>
+            <option value="cubic-bezier(0.34, 1.56, 0.64, 1)">Spring</option>
+            <option value="cubic-bezier(0.16, 1, 0.3, 1)">Expo</option>
+            <option value="cubic-bezier(0.33, 0, 0.67, 0)">Sharp</option>
+            <option value="cubic-bezier(0.85, 0, 0.15, 1)">In Out Expo</option>
+          </select>
+        </div>
+
+        <div class="h-4 w-px bg-slate-800"></div>
+
+        <div class="flex items-center gap-2">
           <span class="text-slate-400 font-medium font-semibold text-indigo-400">Playhead at: <span id="masterPlayheadLabel" class="mono text-white">0%</span></span>
         </div>
       </div>
@@ -839,6 +867,7 @@
     // State Store
     let state = {
       duration: 3.5,
+      timing: 'cubic-bezier(0.25, 1, 0.5, 1)',
       isPlaying: true,
       currentPlayhead: 0, // Current active scrubbing percent limit [0-100]
       selectedLayerId: null,
@@ -862,6 +891,7 @@
     const pauseIcon = document.getElementById('pauseIcon');
     const durationInput = document.getElementById('timelineDuration');
     const durationLabel = document.getElementById('durationLabel');
+    const timingInput = document.getElementById('timingCurve');
     const masterPlayheadLabel = document.getElementById('masterPlayheadLabel');
     const resetConfigBtn = document.getElementById('resetConfigBtn');
     const exportTabButtons = Array.from(document.querySelectorAll('[data-export-format]'));
@@ -933,7 +963,7 @@
 
         keyframesStr += `}\n\n`;
         bundle += keyframesStr;
-        bundle += `${selectorForLayer(layer)} {\n  animation: anim-${layer.id} ${state.duration}s cubic-bezier(0.25, 1, 0.5, 1) infinite;\n}\n\n`;
+        bundle += `${selectorForLayer(layer)} {\n  animation: anim-${layer.id} ${state.duration}s ${state.timing} infinite;\n}\n\n`;
       });
 
       return bundle;
@@ -1449,8 +1479,14 @@ ${buildAnimationBundle((layer) => `#${layer.id}`)}`;
       compileGlobalCSS();
     });
 
+    timingInput.addEventListener('change', (e) => {
+      state.timing = e.target.value;
+      compileGlobalCSS();
+    });
+
     resetConfigBtn.addEventListener('click', () => {
       state.duration = 3.5;
+      state.timing = 'cubic-bezier(0.25, 1, 0.5, 1)';
       state.isPlaying = true;
       state.currentPlayhead = 0;
       state.selectedPercent = 0;
@@ -1458,6 +1494,7 @@ ${buildAnimationBundle((layer) => `#${layer.id}`)}`;
       state.selectedLayerId = state.layers[0].id;
       durationInput.value = state.duration;
       durationLabel.innerText = `${state.duration.toFixed(1)}s`;
+      timingInput.value = state.timing;
       masterPlayheadLabel.innerText = '0%';
       const scrubber = document.getElementById('timelineScrubCursor');
       if (scrubber) scrubber.style.left = '0%';
@@ -1492,6 +1529,7 @@ ${buildAnimationBundle((layer) => `#${layer.id}`)}`;
       const payload = {
         layers: state.layers,
         duration: state.duration,
+        timing: state.timing,
         selectedPercent: state.selectedPercent
       };
       const hash = btoa(JSON.stringify(payload));
@@ -1521,6 +1559,10 @@ ${buildAnimationBundle((layer) => `#${layer.id}`)}`;
             state.duration = parsed.duration;
             durationInput.value = parsed.duration;
             durationLabel.innerText = `${parsed.duration}s`;
+          }
+          if (parsed.timing) {
+            state.timing = parsed.timing;
+            timingInput.value = parsed.timing;
           }
         }
       } catch (err) {

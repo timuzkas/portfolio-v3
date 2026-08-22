@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>timuzkas</title>
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" href="/assets/favicon.ico" />
+    <script src="data.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -387,9 +388,7 @@
     <div class="layout">
       <header>
         <h1>timuzkas</h1>
-        <p class="bio">
-          A full-stack developer.  I've done some freelance and internships at local IT companies and managed (game), as well as made software for clients and as personal projects.
-        </p>
+        <p class="bio" id="bio"></p>
         <nav>
           <ul>
             <li><a href="#about">about</a></li>
@@ -442,129 +441,37 @@
         </section>
 
         <section id="contact" class="reveal">
-          <div class="contact-links">
-            <a href="mailto:ad.humpback456@passinbox.com">Email</a>
-            <a href="https://github.com/timuzkas" target="_blank" rel="noopener"
-              >GitHub</a
-            >
-            <a href="https://gitlab.com/timuzkas" target="_blank" rel="noopener"
-              >GitLab</a
-            >
-            <a href="https://discord.com/users/timuzkas">Discord</a>
-          </div>
+          <div class="contact-links" id="contact-links"></div>
         </section>
       </main>
     </div>
 
     <script>
-      const projects = [
-        {
-          title: 'tbin',
-          desc: 'Fast pastebin + file sharing',
-          tag: 'web',
-          year: '2025',
-          url: 'https://github.com/timuzkas/tbin',
-        },
-        {
-          title: 'vnsee',
-          desc: 'VNC gateway and an secure, multiuser online viewer.',
-          tag: 'web',
-          year: '2026',
-          url: 'https://vnsee.timuzkas.xyz',
-        },
-        {
-          title: 'semiplay',
-          desc: 'Online music client with room sync',
-          tag: 'web',
-          year: '2026',
-          url: 'https://github.com/timuzkas/semiplay',
-        },
-        {
-          title: 'typero',
-          desc: 'Browser-server typing trainer',
-          tag: 'c++',
-          year: '2025',
-          url: 'https://github.com/timuzkas/typero',
-        },
-        {
-          title: 'creapack',
-          desc: 'Package manager for CC:Tweaked',
-          tag: 'lua',
-          year: '2024',
-          url: 'https://gitlab.com/monosoft2/creapack',
-        },
-        {
-          title: 'TextUI',
-          desc: 'UI framework for CC:Tweaked',
-          tag: 'lua',
-          year: '2024',
-          url: 'https://gitlab.com/monosoft2/monoui/textui',
-        },
-        {
-          title: 'musiclo',
-          desc: 'CC:Tweaked music player with sync',
-          tag: 'lua',
-          year: '2024',
-          url: 'https://gitlab.com/monosoft2/musiclo',
-        },
-        {
-          title: 'pTunnel',
-          desc: 'Tunneling utility',
-          tag: 'go',
-          year: '2024',
-          url: '#',
-          priv: true,
-        },
-        {
-          title: 'nanorepo',
-          desc: 'Small C++ / HTML media repository',
-          tag: 'c++',
-          year: '2025',
-          url: 'https://github.com/timuzkas/nanorepo',
-        },
-        {
-          title: 'diaro',
-          desc: 'Language learning app',
-          tag: 'ts',
-          year: '2025',
-          url: 'https://github.com/timuzkas/diara',
-        },
-        {
-          title: 'vocalo',
-          desc: 'Word-learning app in C++ + HTML',
-          tag: 'c++',
-          year: '2026',
-          url: 'https://github.com/timuzkas/vocalo',
-        },
-        {
-          title: 'tlog',
-          desc: 'Minimal log library with tracing',
-          tag: 'c++',
-          year: '2026',
-          url: 'https://github.com/timuzkas/tlog',
-        },
-        {
-          title: 'wldc',
-          desc: 'Discord whitelist bot for Minecraft',
-          tag: 'java',
-          year: '2024',
-          url: 'https://gitlab.com/timuzkas/wldc',
-        },
-        {
-          title: 'portfolio',
-          desc: 'This website.',
-          tag: 'html',
-          year: '2026',
-          url: 'https://github.com/timuzkas/portfolio-v3',
-        },
-        {
-          title: 'x16-PRos',
-          desc: 'Implemented malloc in it.',
-          tag: 'asm',
-          year: '2026',
-          url: 'https://github.com/PRoX2011/x16-PRos',
-        },
-      ];
+      document.getElementById('bio').textContent = PORTFOLIO.bio.simple;
+
+      const contactLinks = document.getElementById('contact-links');
+      const labels = {
+        github: 'GitHub',
+        gitlab: 'GitLab',
+        discord: 'Discord',
+        email: 'Email',
+      };
+      contactLinks.innerHTML = PORTFOLIO.socials
+        .map((social) => {
+          const label = labels[social.label] || social.label;
+          const rel = social.external ? ' target="_blank" rel="noopener"' : '';
+          return `<a href="${social.url}"${rel}>${label}</a>`;
+        })
+        .join('');
+
+      const projects = PORTFOLIO.projects.map((p) => ({
+        title: p.title,
+        desc: p.description,
+        tag: p.tech[0],
+        year: /^\d{4}$/.test(p.tech[1] || '') ? p.tech[1] : '',
+        url: p.url,
+        priv: p.priv,
+      }));
 
       const SHOW = 5;
       const list = document.getElementById('project-list');
@@ -589,7 +496,7 @@
               <span class="proj-desc">${p.desc}</span>
             </div>
             <div class="proj-meta">
-              <span class="proj-year">${p.year}</span>
+              ${p.year ? `<span class="proj-year">${p.year}</span>` : ''}
               <span class="proj-tag">${p.tag}</span>
             </div>`;
           list.appendChild(a);

@@ -21,6 +21,42 @@
                 );
             })();
         </script>
+        <script>
+            (() => {
+                let mode = null;
+                try {
+                    mode = localStorage.getItem("portfolio-mode");
+                } catch {}
+
+                if (mode) return;
+
+                const weak = (() => {
+                    const c = navigator.connection;
+
+                    let score = 0;
+
+                    if (navigator.deviceMemory <= 2) score++;
+                    if (navigator.hardwareConcurrency <= 2) score++;
+                    if (c?.effectiveType === "2g" || c?.effectiveType === "slow-2g")
+                        score++;
+                    if (c?.saveData) score += 2;
+
+                    const ancientBrowser =
+                        !window.fetch || !window.Promise || !window.CSS;
+
+                    return ancientBrowser || score >= 2;
+                })();
+
+                try {
+                    localStorage.setItem(
+                        "portfolio-mode",
+                        weak ? "simple" : "full",
+                    );
+                } catch {}
+
+                if (weak) window.location.replace("simple.html");
+            })();
+        </script>
         <title>timuzkas</title>
         <script src="data.js"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -382,6 +382,22 @@
         opacity: 1;
         transform: none;
       }
+
+      .full-link {
+        font-size: 0.875rem;
+        color: var(--dim);
+      }
+
+      .full-link a {
+        color: var(--dim);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        transition: color 0.3s;
+      }
+
+      .full-link a:hover {
+        color: var(--fg);
+      }
     </style>
   </head>
   <body>
@@ -401,6 +417,9 @@
             <li><a href="#contact">contact</a></li>
           </ul>
         </nav>
+        <p class="full-link">
+          <a href="index.html" id="full-site-link">open the full version →</a>
+        </p>
       </header>
 
       <main>
@@ -560,6 +579,17 @@
       );
 
       document.querySelectorAll('.reveal').forEach((el) => obs.observe(el));
+
+      const fullLink = document.getElementById('full-site-link');
+      if (fullLink) {
+        fullLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          try {
+            localStorage.setItem('portfolio-mode', 'full');
+          } catch {}
+          window.location.href = 'index.html';
+        });
+      }
     </script>
   </body>
 </html>

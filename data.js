@@ -77,6 +77,7 @@ const PORTFOLIO = {
         },
         {
             title: "typero",
+            priv: true,
             description: "Browser-server typing trainer",
             url: "https://github.com/timuzkas/typero",
             tech: ["c++", "2025"],

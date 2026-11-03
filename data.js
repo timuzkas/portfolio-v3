@@ -196,7 +196,7 @@ const PORTFOLIO = {
                 "rgba(173, 255, 47, 0.2)",
                 "rgba(93, 92, 255, 0.16)",
             ],
-        }
+        },
         {
             title: "nanorepo",
             description: "Small C++ / HTML media repository",
@@ -220,7 +220,7 @@ const PORTFOLIO = {
                 "rgba(173, 255, 47, 0.2)",
                 "rgba(93, 92, 255, 0.18)",
             ],
-        }
+        },
         {
             title: "tlog",
             description: "Minimal log library with tracing",

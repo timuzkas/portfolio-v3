@@ -45,10 +45,26 @@ const PORTFOLIO = {
     ],
     projects: [
         {
+            title: "gig",
+            description: "A Git interface built with Go and GTK4.",
+            url: "https://github.com/timuzkas/gig",
+            tech: ["go", "gtk4"],
+            year: "26",
+            images: [
+                "https://github.com/timuzkas/gig/blob/dev/screenshot.png?raw=true",
+            ],
+            colors: [
+                "rgba(0, 226, 255, 0.22)",
+                "rgba(255, 54, 208, 0.2)",
+            ],
+        },
+        {
             title: "tbin2",
             description: "Fast pastebin + file sharing and... v2!",
             url: "https://bin.timuzkas.xyz",
             tech: ["web", "2026"],
+            year: "26",
+            images: [],
             colors: [
                 "rgba(0, 226, 255, 0.22)",
                 "rgba(255, 54, 208, 0.2)",
@@ -59,6 +75,8 @@ const PORTFOLIO = {
             description: "simple link shortener ( and tracker remover )",
             url: "https://l.timuzkas.xyz",
             tech: ["web", "2026"],
+            year: "26",
+            images: [],
             colors: [
                 "rgba(255, 180, 0, 0.24)",
                 "rgba(93, 92, 255, 0.18)",
@@ -70,6 +88,8 @@ const PORTFOLIO = {
                 "VNC gateway and an secure, multiuser online viewer.",
             url: "https://vnsee.timuzkas.xyz",
             tech: ["web", "2026"],
+            year: "26",
+            images: [],
             colors: [
                 "rgba(173, 255, 47, 0.22)",
                 "rgba(0, 170, 255, 0.18)",
@@ -80,6 +100,8 @@ const PORTFOLIO = {
             description: "Online music client with room sync",
             url: "https://github.com/timuzkas/semiplay",
             tech: ["web", "2026"],
+            year: "26",
+            images: ["assets/semiplay.webp"],
             colors: [
                 "rgba(255, 180, 0, 0.24)",
                 "rgba(93, 92, 255, 0.18)",
@@ -91,6 +113,8 @@ const PORTFOLIO = {
             description: "Browser-server typing trainer",
             url: "https://github.com/timuzkas/typero",
             tech: ["c++", "2025"],
+            year: "25",
+            images: [],
             colors: [
                 "rgba(255, 105, 180, 0.22)",
                 "rgba(0, 226, 255, 0.18)",
@@ -101,6 +125,8 @@ const PORTFOLIO = {
             description: "Package manager for CC:Tweaked",
             url: "https://gitlab.com/monosoft2/creapack",
             tech: ["lua", "2024"],
+            year: "24",
+            images: [],
             colors: [
                 "rgba(0, 170, 255, 0.22)",
                 "rgba(255, 180, 0, 0.18)",
@@ -111,6 +137,10 @@ const PORTFOLIO = {
             description: "UI framework for CC:Tweaked",
             url: "https://gitlab.com/monosoft2/monoui/textui",
             tech: ["lua", "2024"],
+            year: "24",
+            images: [
+                "https://gitlab.com/monosoft2/monoui/textui/-/raw/main/assets/2024-09-16_21.21.40.bmp",
+            ],
             colors: [
                 "rgba(173, 255, 47, 0.22)",
                 "rgba(255, 54, 208, 0.18)",
@@ -121,6 +151,8 @@ const PORTFOLIO = {
             description: "CC:Tweaked music player with sync",
             url: "https://gitlab.com/monosoft2/musiclo",
             tech: ["lua", "2024"],
+            year: "24",
+            images: ["https://pinestore.cc/project/136/thumbnail_full.webp"],
             colors: [
                 "rgba(255, 180, 0, 0.22)",
                 "rgba(93, 92, 255, 0.18)",
@@ -132,6 +164,8 @@ const PORTFOLIO = {
             url: "#",
             priv: true,
             tech: ["go", "2024", "private"],
+            year: "24",
+            images: [],
             colors: [
                 "rgba(255, 105, 180, 0.2)",
                 "rgba(173, 255, 47, 0.16)",
@@ -143,6 +177,8 @@ const PORTFOLIO = {
             url: "https://github.com/timuzkas/ctube",
             priv: true,
             tech: ["lua", "cc:tweaked"],
+            year: "--",
+            images: [],
             colors: [
                 "rgba(255, 180, 0, 0.2)",
                 "rgba(0, 226, 255, 0.16)",
@@ -154,26 +190,20 @@ const PORTFOLIO = {
                 "CC:Tweaked file sync for easier development",
             url: "https://github.com/timuzkas/nairo",
             tech: ["go", "cc:tweaked"],
+            year: "--",
+            images: [],
             colors: [
                 "rgba(173, 255, 47, 0.2)",
                 "rgba(93, 92, 255, 0.16)",
             ],
-        },
-        {
-            title: "luxweb",
-            description: "C++23 web framework?",
-            url: "https://lux.timuzkas.xyz",
-            tech: ["c++23", "web"],
-            colors: [
-                "rgba(0, 170, 255, 0.2)",
-                "rgba(255, 54, 208, 0.16)",
-            ],
-        },
+        }
         {
             title: "nanorepo",
             description: "Small C++ / HTML media repository",
             url: "https://github.com/timuzkas/nanorepo",
             tech: ["c++", "2025"],
+            year: "25",
+            images: [],
             colors: [
                 "rgba(0, 226, 255, 0.2)",
                 "rgba(255, 180, 0, 0.18)",
@@ -184,26 +214,20 @@ const PORTFOLIO = {
             description: "Language learning app",
             url: "https://github.com/timuzkas/diara",
             tech: ["ts", "2025"],
+            year: "25",
+            images: [],
             colors: [
                 "rgba(173, 255, 47, 0.2)",
                 "rgba(93, 92, 255, 0.18)",
             ],
-        },
-        {
-            title: "vocalo",
-            description: "Word-learning app in C++ + HTML",
-            url: "https://github.com/timuzkas/vocalo",
-            tech: ["c++", "2026"],
-            colors: [
-                "rgba(255, 54, 208, 0.2)",
-                "rgba(0, 170, 255, 0.16)",
-            ],
-        },
+        }
         {
             title: "tlog",
             description: "Minimal log library with tracing",
             url: "https://github.com/timuzkas/tlog",
             tech: ["c++", "2026"],
+            year: "26",
+            images: [],
             colors: [
                 "rgba(255, 180, 0, 0.2)",
                 "rgba(0, 226, 255, 0.16)",
@@ -214,6 +238,8 @@ const PORTFOLIO = {
             description: "Discord whitelist bot for Minecraft",
             url: "https://gitlab.com/timuzkas/wldc",
             tech: ["java", "2024"],
+            year: "24",
+            images: [],
             colors: [
                 "rgba(93, 92, 255, 0.2)",
                 "rgba(255, 105, 180, 0.16)",
@@ -224,6 +250,8 @@ const PORTFOLIO = {
             description: "This website.",
             url: "https://github.com/timuzkas/portfolio-v3",
             tech: ["html", "2026"],
+            year: "26",
+            images: [],
             colors: [
                 "rgba(173, 255, 47, 0.2)",
                 "rgba(255, 54, 208, 0.16)",
@@ -234,6 +262,8 @@ const PORTFOLIO = {
             description: "Implemented malloc in it.",
             url: "https://github.com/PRoX2011/x16-PRos",
             tech: ["asm", "2026"],
+            year: "26",
+            images: [],
             colors: [
                 "rgba(0, 170, 255, 0.2)",
                 "rgba(255, 180, 0, 0.16)",

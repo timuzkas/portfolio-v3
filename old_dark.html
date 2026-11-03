@@ -1,0 +1,2418 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script>
+            (() => {
+                const params = new URLSearchParams(window.location.search);
+                const requestedTheme = params.get("theme");
+                let savedTheme = null;
+
+                if (requestedTheme === "dark") {
+                    try {
+                        localStorage.setItem("portfolio-theme", "dark");
+                    } catch {}
+
+                    params.delete("theme");
+                    const cleanQuery = params.toString();
+                    window.history.replaceState(
+                        null,
+                        "",
+                        `${window.location.pathname}${cleanQuery ? `?${cleanQuery}` : ""}${window.location.hash}`,
+                    );
+                    return;
+                }
+
+                try {
+                    savedTheme = localStorage.getItem("portfolio-theme");
+                } catch {}
+                const currentFile =
+                    window.location.pathname.split("/").pop() || "index.html";
+
+                if (currentFile === "old_dark.html" && savedTheme === "light") {
+                    window.location.replace("old.html");
+                }
+            })();
+        </script>
+        <script>
+            (() => {
+                let mode = null;
+                try {
+                    mode = localStorage.getItem("portfolio-mode");
+                } catch {}
+
+                if (mode) return;
+
+                const weak = (() => {
+                    const c = navigator.connection;
+
+                    let score = 0;
+
+                    if (navigator.deviceMemory <= 2) score++;
+                    if (navigator.hardwareConcurrency <= 2) score++;
+                    if (c?.effectiveType === "2g" || c?.effectiveType === "slow-2g")
+                        score++;
+                    if (c?.saveData) score += 2;
+
+                    const ancientBrowser =
+                        !window.fetch || !window.Promise || !window.CSS;
+
+                    return ancientBrowser || score >= 2;
+                })();
+
+                try {
+                    localStorage.setItem(
+                        "portfolio-mode",
+                        weak ? "simple" : "full",
+                    );
+                } catch {}
+
+                if (weak) window.location.replace("simple.html");
+            })();
+        </script>
+        <title>timuzkas</title>
+        <script src="data.js"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Chango&family=Syne:wght@700;800&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            :root {
+                --bg: #fff;
+                --fg: #111;
+                --muted: rgba(17, 17, 17, 0.58);
+                --line: rgba(17, 17, 17, 0.12);
+                --text-left: 12vw;
+                --text-bottom: 62vh;
+                --text-width: 76vw;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            html,
+            body {
+                margin: 0;
+                width: 100%;
+                min-height: 100%;
+                overflow-x: hidden;
+                background: var(--bg);
+                color: var(--fg);
+                font-family:
+                    "Arial Black", "Trebuchet MS", "Verdana", system-ui,
+                    sans-serif;
+            }
+
+            canvas {
+                display: block;
+                width: 100vw;
+                height: 100vh;
+            }
+
+            .page {
+                min-height: 150vh;
+            }
+
+            .hero {
+                position: sticky;
+                top: 0;
+                min-height: 145vh;
+                overflow: hidden;
+                isolation: isolate;
+            }
+
+            #c {
+                position: absolute;
+                inset: 0;
+                z-index: 0;
+            }
+
+            .below-title {
+                position: absolute;
+                z-index: 2;
+                left: var(--text-left);
+                top: calc(
+                    var(--text-bottom, 52vh) + clamp(7.2rem, 9.2vh, 2.8rem)
+                );
+                bottom: auto;
+                width: min(68vw, calc(100vw - var(--text-left) - 12vw));
+                max-width: calc(100vw - var(--text-left) - 12vw);
+                min-height: 24rem;
+            }
+
+            .subtitle {
+                max-width: 38ch;
+                margin: 0;
+                color: var(--muted);
+                font-family: "Trebuchet MS", Verdana, system-ui, sans-serif;
+                font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+                font-weight: 700;
+                line-height: 1.35;
+                letter-spacing: 0;
+                transition:
+                    color 0.35s ease,
+                    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .subtitle:hover {
+                color: var(--fg);
+            }
+
+            .subtitle-egg {
+                position: relative;
+                display: inline-block;
+                padding: 0 0.06em;
+                margin: 0 -0.02em;
+                border-bottom: 1px dashed rgba(17, 17, 17, 0.22);
+                color: inherit;
+                cursor: help;
+                transition:
+                    color 0.28s ease,
+                    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                    border-color 0.28s ease,
+                    text-shadow 0.28s ease;
+            }
+
+            .subtitle-egg::after,
+            .footer-link::after {
+                content: attr(data-egg);
+                position: absolute;
+                left: 50%;
+                bottom: calc(100% + 0.6rem);
+                z-index: 4;
+                opacity: 0;
+                padding: 0.42rem 0.65rem 0.45rem;
+                border: 1px solid rgba(17, 17, 17, 0.12);
+                border-radius: 12px;
+                background: rgba(255, 255, 255, 0.95);
+                color: rgba(17, 17, 17, 0.9);
+                font-size: 0.72em;
+                font-weight: 700;
+                letter-spacing: 0.01em;
+                line-height: 1.15;
+                text-transform: none;
+                white-space: nowrap;
+                box-shadow: 0 14px 30px rgba(17, 17, 17, 0.12);
+                pointer-events: none;
+                transform: translate(-50%, 4px) scale(0.95);
+                transition:
+                    opacity 0.2s ease,
+                    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .footer-link::after {
+                content: "simpler version";
+                padding-right: 1.9rem;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 9 5 12 1.8-5.2L21 14Z'/%3E%3Cpath d='M7.2 2.2 8 5.1'/%3E%3Cpath d='m5.1 8-2.9-.8'/%3E%3Cpath d='M14 4.1 12 6'/%3E%3Cpath d='m6 12-1.9 2'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 0.5rem center;
+                background-size: 14px 14px;
+            }
+
+            .subtitle-egg::before,
+            .footer-link::before {
+                content: "";
+                position: absolute;
+                left: 50%;
+                bottom: calc(100% + 0.6rem);
+                z-index: 4;
+                margin-left: -5px;
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 6px solid rgba(255, 255, 255, 0.95);
+                opacity: 0;
+                transform: translateY(4px);
+                transition:
+                    opacity 0.2s ease,
+                    transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+                pointer-events: none;
+            }
+
+            .subtitle-egg:hover {
+                color: var(--fg);
+                transform: translateY(0) rotate(-0.5deg);
+                border-color: rgba(17, 17, 17, 0.45);
+                text-shadow: 0 0 0.7rem rgba(255, 255, 255, 0.18);
+            }
+
+            .subtitle-egg:hover::after,
+            .subtitle-egg:hover::before {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+
+            .intro {
+                width: min(
+                    42ch,
+                    calc(100% - 292px - clamp(0.15rem, 0.35vw, 0.3rem))
+                );
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .socials {
+                display: grid;
+                gap: 0.45rem;
+                width: min(34ch, 100%);
+                padding-bottom: 2rem;
+            }
+
+            .social-link {
+                --mx: 50%;
+                --my: 50%;
+                position: relative;
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+                gap: 0.7rem;
+                align-items: center;
+                min-height: 32px;
+                overflow: hidden;
+                border: 0;
+                border-bottom: 1px solid rgba(17, 17, 17, 0.16);
+                padding: 0.5rem 0.7rem 0.5rem 0.85rem;
+                border-radius: 8px;
+                color: rgba(17, 17, 17, 0.68);
+                background: transparent;
+                box-shadow: none;
+                font-family: "Trebuchet MS", Verdana, system-ui, sans-serif;
+                font-size: 0.76rem;
+                font-weight: 900;
+                letter-spacing: 0.06em;
+                text-decoration: none;
+                text-transform: uppercase;
+                transform: translateX(var(--shift-x));
+                transition:
+                    background 0.2s ease,
+                    border-color 0.3s ease,
+                    box-shadow 0.3s ease,
+                    color 0.3s ease,
+                    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .social-link::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: inherit;
+                background:
+                    radial-gradient(
+                        120% 180% at var(--mx) var(--my),
+                        var(--card-a) 0%,
+                        transparent 38%
+                    ),
+                    linear-gradient(
+                        90deg,
+                        transparent,
+                        var(--card-b) 50%,
+                        transparent
+                    );
+                opacity: 0;
+                transform: scaleX(0.6);
+                transform-origin: left center;
+                filter: blur(2px);
+                transition:
+                    opacity 0.5s ease,
+                    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+                    inset 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+                pointer-events: none;
+            }
+
+            .social-link span:first-child {
+                color: rgba(17, 17, 17, 0.35);
+                font-size: 0.68rem;
+            }
+
+            .social-link span:last-child {
+                justify-self: end;
+                font-size: 1rem;
+            }
+
+            .social-link:hover {
+                color: var(--fg);
+                border-color: transparent;
+                transform: translateX(6px);
+                box-shadow: 0 1px 0 0 rgba(17, 17, 17, 0.18) inset;
+            }
+
+            .social-link:hover::before {
+                opacity: 0.9;
+                transform: scaleX(1);
+            }
+
+            .social-link:hover span {
+                transform: translate3d(var(--mx) 0, 0, 0);
+            }
+
+            .social-link span {
+                transition:
+                    color 0.35s ease,
+                    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+                    letter-spacing 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+                will-change: transform;
+            }
+
+            .social-link:hover span:first-child {
+                color: rgba(17, 17, 17, 0.55);
+                transform: translate3d(0, 0, 0);
+            }
+
+            .social-link:hover span:nth-child(2) {
+                letter-spacing: 0.02em;
+            }
+
+            .social-link:hover span:last-child {
+                transform: translate3d(6px, 0, 0);
+                color: var(--fg);
+            }
+            .deck {
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 292px;
+                perspective: 1200px;
+            }
+
+            .deck::before,
+            .deck::after {
+                content: "";
+                position: absolute;
+                right: 0;
+                top: 2.35rem;
+                width: 100%;
+                aspect-ratio: 2.5 / 3.5;
+                border: 1px solid rgba(17, 17, 17, 0.1);
+                border-radius: 8px;
+                background:
+                    linear-gradient(
+                        135deg,
+                        transparent 0 42%,
+                        rgba(17, 17, 17, 0.08) 42% 43%,
+                        transparent 43%
+                    ),
+                    linear-gradient(
+                        155deg,
+                        rgba(255, 255, 255, 0.72),
+                        rgba(255, 255, 255, 0.22)
+                    );
+                box-shadow: 0 18px 36px rgba(17, 17, 17, 0.06);
+                pointer-events: none;
+            }
+
+            .deck::before {
+                transform: rotate(-7deg) translate(-16px, 12px);
+            }
+
+            .deck::after {
+                transform: rotate(5deg) translate(14px, 9px);
+            }
+
+            .deck-meta {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.75rem;
+                color: rgba(17, 17, 17, 0.42);
+                font-family: "Trebuchet MS", Verdana, system-ui, sans-serif;
+                font-size: 0.74rem;
+                font-weight: 800;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+
+            .project-card {
+                --drag-x: 0px;
+                --drag-y: 0px;
+                --drag-rot: 0deg;
+                --flow-x: 50%;
+                --flow-y: 45%;
+                --title-nudge-x: 0px;
+                --title-nudge-y: 0px;
+                --title-tilt: 0;
+                --title-size: 2.8rem;
+                position: relative;
+                z-index: 2;
+                isolation: isolate;
+                display: block;
+                overflow: hidden;
+                width: 100%;
+                aspect-ratio: 2.5 / 3.5;
+                min-height: 0;
+                border: 1px solid rgba(17, 17, 17, 0.13);
+                border-radius: 14px;
+                background:
+                    linear-gradient(
+                        160deg,
+                        rgba(255, 255, 255, 0.96) 0%,
+                        rgba(255, 255, 255, 0.72) 55%,
+                        rgba(255, 255, 255, 0.88) 100%
+                    ),
+                    linear-gradient(
+                        135deg,
+                        var(--card-a),
+                        rgba(255, 255, 255, 0.08),
+                        var(--card-b)
+                    );
+                box-shadow:
+                    0 2px 0 rgba(255, 255, 255, 0.9) inset,
+                    0 -1px 0 rgba(17, 17, 17, 0.08) inset,
+                    0 28px 60px rgba(17, 17, 17, 0.1),
+                    0 6px 16px rgba(17, 17, 17, 0.06);
+                padding: 1.2rem 1.2rem 1.15rem;
+                cursor: pointer;
+                transform-style: preserve-3d;
+                transform: translate3d(var(--drag-x), var(--drag-y), 0)
+                    rotateZ(var(--drag-rot));
+                user-select: none;
+                touch-action: none;
+                transition:
+                    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .project-card:hover {
+                transform: translate3d(var(--drag-x), var(--drag-y), 0)
+                    rotateZ(var(--drag-rot)) rotateY(-8deg) rotateX(3deg)
+                    translateY(-10px);
+                box-shadow:
+                    0 2px 0 rgba(255, 255, 255, 0.95) inset,
+                    0 -1px 0 rgba(17, 17, 17, 0.1) inset,
+                    0 44px 80px rgba(17, 17, 17, 0.14),
+                    0 12px 28px rgba(17, 17, 17, 0.08);
+            }
+
+            .project-card.is-dragging {
+                cursor: grabbing;
+                transition: box-shadow 0.2s ease;
+            }
+
+            .project-card.is-opening {
+                pointer-events: none;
+            }
+
+            .project-corner {
+                position: absolute;
+                z-index: 3;
+                color: rgba(17, 17, 17, 0.38);
+                font-family: "Trebuchet MS", Verdana, system-ui, sans-serif;
+                font-size: 0.72rem;
+                font-weight: 900;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                pointer-events: none;
+            }
+
+            .project-corner-top {
+                top: 1rem;
+                left: 1rem;
+            }
+
+            .project-corner-bottom {
+                right: 1rem;
+                bottom: 1rem;
+                transform: rotate(180deg);
+            }
+
+            .project-card::before {
+                content: "";
+                position: absolute;
+                inset: -30%;
+                border-radius: inherit;
+                background: conic-gradient(
+                    from 220deg at var(--flow-x) var(--flow-y),
+                    transparent 0 8%,
+                    var(--card-a) 14%,
+                    rgba(255, 255, 255, 0.7) 24%,
+                    var(--card-b) 38%,
+                    transparent 50%,
+                    var(--card-a) 72%,
+                    transparent 86%
+                );
+                filter: blur(14px) saturate(1.6);
+                opacity: 0.55;
+                pointer-events: none;
+                transform: rotate(-8deg) scale(1.05);
+                z-index: 0;
+                transition:
+                    opacity 0.55s ease,
+                    transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+                animation: card-flow 8s ease-in-out infinite alternate;
+            }
+
+            .project-card:hover::before {
+                opacity: 0.82;
+                transform: rotate(8deg) scale(1.14);
+            }
+
+            .project-inner > * {
+                position: relative;
+                z-index: 1;
+            }
+
+            .project-inner {
+                position: relative;
+                z-index: 1;
+                display: flex;
+                height: 100%;
+                flex-direction: column;
+                justify-content: space-between;
+                transform: none;
+                backface-visibility: visible;
+                pointer-events: none;
+            }
+
+            .project-card * {
+                pointer-events: none;
+            }
+
+            .project-inner > div:first-child {
+                display: flex;
+                flex: 1;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 0;
+                padding-top: 0.2rem;
+            }
+
+            .project-card .project-inner::before {
+                content: none;
+            }
+
+            .project-title {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.02rem;
+                width: 100%;
+                margin: 0;
+                max-width: 90%;
+                min-height: 0;
+                align-content: center;
+                color: rgba(16, 16, 16, 0.95);
+                font-family: "Chango", "Arial Black", system-ui, sans-serif;
+                font-size: clamp(2rem, var(--title-size), 2.95rem);
+                font-weight: 400;
+                line-height: 0.9;
+                letter-spacing: -0.04em;
+                text-align: center;
+                text-transform: none;
+                text-shadow:
+                    0 1px 0 rgba(255, 255, 255, 0.98),
+                    -0.035em 0.03em 0 var(--card-a),
+                    0 0 0.9rem rgba(255, 255, 255, 0.38);
+                pointer-events: auto;
+                cursor: pointer;
+                transition:
+                    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+                    text-shadow 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+                    filter 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .project-face .project-title {
+                margin-top: 0;
+            }
+
+            .project-title-line {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.1em;
+                width: 100%;
+                max-width: 100%;
+                transform: translate3d(0, 0, 0);
+                transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .project-title-line.line-2 {
+                margin-top: -0.05em;
+            }
+
+            .project-title-line.line-split {
+                gap: 0.035em;
+            }
+
+            .project-title-word {
+                display: inline-block;
+                max-width: 100%;
+                white-space: nowrap;
+                transform: translate3d(0, 0, 0) rotate(0deg);
+                transform-origin: center bottom;
+                will-change: transform;
+                transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .project-card:hover .project-title {
+                transform: translate3d(
+                        var(--title-nudge-x),
+                        var(--title-nudge-y),
+                        0
+                    )
+                    translateY(-1px) rotateX(4deg)
+                    rotateY(calc(var(--title-tilt, 0) * 1deg));
+                filter: drop-shadow(0 10px 14px rgba(17, 17, 17, 0.08));
+            }
+
+            .project-card:hover .project-title-line {
+                transform: translateY(-1px);
+            }
+
+            .project-card:hover .project-title-line.line-2 {
+                transform: translateY(1px);
+            }
+
+            .project-card:hover .project-title-word {
+                transform: translate3d(var(--jump-x, 0), var(--jump-y, 0), 0)
+                    rotate(var(--jump-rot, 0deg)) scale(1.04);
+            }
+
+            .project-card.next {
+                transform: translateY(12px) scale(0.95);
+                opacity: 0.6;
+            }
+
+            .project-tech-list {
+                position: absolute;
+                top: 1rem;
+                right: 1rem;
+                z-index: 3;
+                display: flex;
+                flex-direction: row-reverse;
+                flex-wrap: wrap;
+                align-content: flex-start;
+                align-items: flex-start;
+                justify-content: flex-start;
+                gap: 0.28rem;
+                width: min(46%, 140px);
+                margin-top: 0;
+                padding: 0;
+                border: 0;
+                background: none;
+                box-shadow: none;
+                transform-origin: top right;
+                text-align: right;
+            }
+
+            .project-tech-label {
+                display: none;
+            }
+
+            .project-tech-chip {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0.28rem 0.48rem 0.25rem;
+                border: 1px solid rgba(17, 17, 17, 0.14);
+                border-radius: 999px;
+                background:
+                    linear-gradient(
+                        180deg,
+                        rgba(255, 255, 255, 0.88) 0%,
+                        rgba(255, 255, 255, 0.58) 100%
+                    ),
+                    linear-gradient(
+                        135deg,
+                        rgba(255, 255, 255, 0.2),
+                        var(--chip-glow, rgba(17, 17, 17, 0.05))
+                    );
+                box-shadow:
+                    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+                    0 6px 12px rgba(17, 17, 17, 0.05);
+                color: rgba(17, 17, 17, 0.74);
+                font-family: "Trebuchet MS", Verdana, system-ui, sans-serif;
+                font-size: 0.58rem;
+                font-weight: 800;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                transition:
+                    transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+                    background 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .project-card:hover .project-tech-chip {
+                transform: translateY(-1px) rotate(-1deg);
+                box-shadow:
+                    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+                    0 8px 14px rgba(17, 17, 17, 0.07);
+            }
+
+            .project-desc {
+                display: block;
+                position: relative;
+                z-index: 2;
+                margin: 0;
+                padding: 0.68rem 0 0;
+                border-top: 1px solid rgba(17, 17, 17, 0.1);
+                color: rgba(17, 17, 17, 0.66);
+                font-family: "Trebuchet MS", Verdana, system-ui, sans-serif;
+                font-size: clamp(0.73rem, 0.85vw, 0.82rem);
+                font-weight: 700;
+                line-height: 1.4;
+                text-wrap: pretty;
+                opacity: 1;
+                pointer-events: none;
+                visibility: visible;
+            }
+
+            @keyframes card-flow {
+                0% {
+                    transform: rotate(-10deg) translate(-4%, -2%) scale(1.05);
+                }
+                50% {
+                    transform: rotate(2deg) translate(3%, 2%) scale(1.08);
+                }
+                100% {
+                    transform: rotate(10deg) translate(-1%, 4%) scale(1.12);
+                }
+            }
+            .footer {
+                position: relative;
+                z-index: 100;
+                display: flex;
+                min-height: 5vh;
+                align-items: end;
+                justify-content: center;
+                padding: 0 1rem 1.4rem;
+                color: rgba(17, 17, 17, 0.42);
+                font-family: "Trebuchet MS", Verdana, system-ui, sans-serif;
+                font-size: 0.85rem;
+                font-weight: 900;
+                letter-spacing: 0.08em;
+            }
+
+            .footer-link {
+                position: relative;
+                display: inline-flex;
+                gap: 0.01em;
+                padding: 0.08rem 0.2rem 0.1rem;
+                border: 0;
+                color: inherit;
+                background: transparent;
+                text-decoration: none;
+                transition:
+                    color 0.35s ease,
+                    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .footer-letter {
+                position: relative;
+                display: inline-block;
+                min-width: 0.28em;
+                transform: translate(var(--run-x, 0), var(--run-y, 0))
+                    rotate(var(--run-rot, 0deg));
+                transition:
+                    color 0.25s ease,
+                    transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+                pointer-events: none;
+            }
+
+            .footer-letter::after {
+                content: "";
+                position: absolute;
+                left: -0.16em;
+                right: -0.16em;
+                bottom: -0.18rem;
+                height: 2px;
+                background: repeating-linear-gradient(
+                    90deg,
+                    currentColor 0 5px,
+                    transparent 5px 8px
+                );
+                color: rgba(17, 17, 17, 0.3);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+
+            .footer-link:hover {
+                color: var(--fg);
+                transform: translateY(-3px);
+                cursor: pointer;
+            }
+
+            .footer-link:hover::after,
+            .footer-link:hover::before {
+                opacity: 1;
+                transform: translate(
+                        calc(-50% + var(--tip-x, 0px)),
+                        0
+                    )
+                    rotate(var(--tip-rot, 0deg));
+            }
+
+            .footer-link:hover .footer-letter {
+                color: rgba(17, 17, 17, 0.72);
+            }
+
+            .footer-link:hover .footer-letter::after {
+                opacity: 1;
+            }
+
+            @media (max-width: 860px) {
+                .below-title {
+                    left: 6vw;
+                    top: calc(var(--text-bottom, 48vh) + 4rem);
+                    bottom: auto;
+                    width: 88vw;
+                    min-height: 0;
+                    max-width: none;
+                }
+
+                .subtitle {
+                    max-width: 78vw;
+                }
+
+                .intro {
+                    width: auto;
+                }
+
+                .deck {
+                    position: relative;
+                    top: auto;
+                    right: auto;
+                    width: min(260px, 76vw);
+                    min-width: 0;
+                    margin-top: 1.2rem;
+                    margin-inline: auto;
+                }
+            }
+
+            /* Dark palette */
+            :root {
+                --bg: #090b10;
+                --fg: #f2f4f8;
+                --muted: rgba(242, 244, 248, 0.62);
+                --line: rgba(242, 244, 248, 0.14);
+            }
+
+            body {
+                background: var(--bg);
+            }
+
+            .subtitle-egg {
+                border-bottom-color: rgba(242, 244, 248, 0.24);
+            }
+
+            .subtitle-egg::after,
+            .footer-link::after {
+                border-color: rgba(242, 244, 248, 0.16);
+                background: rgba(21, 24, 32, 0.94);
+                color: rgba(242, 244, 248, 0.9);
+                box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4);
+            }
+
+            .footer-link::after {
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f2f4f8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 9 5 12 1.8-5.2L21 14Z'/%3E%3Cpath d='M7.2 2.2 8 5.1'/%3E%3Cpath d='m5.1 8-2.9-.8'/%3E%3Cpath d='M14 4.1 12 6'/%3E%3Cpath d='m6 12-1.9 2'/%3E%3C/svg%3E");
+                background-repeat: no-repeat;
+                background-position: right 0.5rem center;
+                background-size: 14px 14px;
+            }
+
+            .subtitle-egg::before,
+            .footer-link::before {
+                border-top-color: rgba(21, 24, 32, 0.94);
+            }
+
+            .subtitle-egg:hover {
+                border-color: rgba(242, 244, 248, 0.5);
+                text-shadow: 0 0 0.7rem rgba(255, 255, 255, 0.2);
+            }
+
+            .social-link {
+                border-bottom-color: rgba(242, 244, 248, 0.2);
+                color: rgba(242, 244, 248, 0.7);
+            }
+
+            .social-link span:first-child {
+                color: rgba(242, 244, 248, 0.38);
+            }
+
+            .social-link:hover {
+                box-shadow: 0 1px 0 0 rgba(242, 244, 248, 0.24) inset;
+            }
+
+            .social-link:hover span:first-child {
+                color: rgba(242, 244, 248, 0.58);
+            }
+
+            .deck::before,
+            .deck::after {
+                border-color: rgba(242, 244, 248, 0.12);
+                background:
+                    linear-gradient(
+                        135deg,
+                        transparent 0 42%,
+                        rgba(242, 244, 248, 0.1) 42% 43%,
+                        transparent 43%
+                    ),
+                    linear-gradient(
+                        155deg,
+                        rgba(38, 43, 56, 0.82),
+                        rgba(24, 28, 38, 0.36)
+                    );
+                box-shadow: 0 18px 36px rgba(0, 0, 0, 0.24);
+            }
+
+            .deck-meta {
+                color: rgba(242, 244, 248, 0.46);
+            }
+
+            .project-card {
+                border-color: rgba(242, 244, 248, 0.16);
+                background:
+                    linear-gradient(
+                        160deg,
+                        rgba(33, 38, 50, 0.96) 0%,
+                        rgba(21, 25, 34, 0.84) 55%,
+                        rgba(28, 33, 44, 0.94) 100%
+                    ),
+                    linear-gradient(
+                        135deg,
+                        var(--card-a),
+                        rgba(0, 0, 0, 0.12),
+                        var(--card-b)
+                    );
+                box-shadow:
+                    0 2px 0 rgba(255, 255, 255, 0.1) inset,
+                    0 -1px 0 rgba(0, 0, 0, 0.3) inset,
+                    0 28px 60px rgba(0, 0, 0, 0.34),
+                    0 6px 16px rgba(0, 0, 0, 0.24);
+            }
+
+            .project-card:hover {
+                box-shadow:
+                    0 2px 0 rgba(255, 255, 255, 0.14) inset,
+                    0 -1px 0 rgba(0, 0, 0, 0.35) inset,
+                    0 44px 80px rgba(0, 0, 0, 0.44),
+                    0 12px 28px rgba(0, 0, 0, 0.3);
+            }
+
+            .project-corner {
+                color: rgba(242, 244, 248, 0.42);
+            }
+
+            .project-title {
+                color: rgba(248, 250, 255, 0.96);
+                text-shadow:
+                    0 1px 0 rgba(0, 0, 0, 0.72),
+                    -0.035em 0.03em 0 var(--card-a),
+                    0 0 0.9rem rgba(255, 255, 255, 0.16);
+            }
+
+            .project-tech-chip {
+                border-color: rgba(242, 244, 248, 0.17);
+                background:
+                    linear-gradient(
+                        180deg,
+                        rgba(52, 58, 73, 0.88) 0%,
+                        rgba(31, 36, 48, 0.72) 100%
+                    ),
+                    linear-gradient(
+                        135deg,
+                        rgba(255, 255, 255, 0.08),
+                        var(--chip-glow, rgba(255, 255, 255, 0.04))
+                    );
+                box-shadow:
+                    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+                    0 6px 12px rgba(0, 0, 0, 0.22);
+                color: rgba(242, 244, 248, 0.78);
+            }
+
+            .project-desc {
+                border-top-color: rgba(242, 244, 248, 0.14);
+                color: rgba(242, 244, 248, 0.68);
+            }
+
+            .footer {
+                color: rgba(242, 244, 248, 0.46);
+            }
+
+            .footer-link:hover .footer-letter::after {
+                color: rgba(242, 244, 248, 0.36);
+            }
+
+            .footer-link:hover .footer-letter {
+                color: rgba(242, 244, 248, 0.78);
+            }
+
+            .site-controls {
+                position: fixed;
+                top: 1rem;
+                right: 1rem;
+                z-index: 200;
+                display: flex;
+                align-items: center;
+                gap: 0.45rem;
+            }
+
+            .theme-toggle {
+                display: grid;
+                width: 2rem;
+                height: 2rem;
+                place-items: center;
+                border: 0;
+                border-radius: 50%;
+                padding: 0;
+                color: rgba(242, 244, 248, 0.64);
+                background: transparent;
+                box-shadow: none;
+                cursor: pointer;
+                backdrop-filter: blur(10px);
+                transition:
+                    color 0.2s ease,
+                    background 0.2s ease,
+                    transform 0.2s ease;
+            }
+
+            .theme-toggle svg {
+                width: 1rem;
+                height: 1rem;
+                fill: none;
+                stroke: currentColor;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                stroke-width: 1.7;
+                transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .theme-toggle:hover,
+            .theme-toggle:focus-visible {
+                color: var(--fg);
+                background: rgba(242, 244, 248, 0.08);
+                outline: none;
+                transform: translateY(-1px);
+            }
+
+            .theme-toggle:hover svg,
+            .theme-toggle:focus-visible svg {
+                transform: rotate(22deg) scale(1.1);
+            }
+
+            .theme-toggle:active svg {
+                transform: rotate(180deg) scale(0.82);
+            }
+
+            .beta-chip {
+                /* display: inline-flex; */
+                display: none; /* ehh, i feel like its unnecesarry as its quite unfinished and i'm not planning to doing that right now */
+                align-items: center;
+                gap: 0.4rem;
+                height: 2rem;
+                padding: 0 0.7rem;
+                overflow: hidden;
+                isolation: isolate;
+                border: 1px solid rgba(242, 244, 248, 0.18);
+                border-radius: 999px;
+                background: rgba(242, 244, 248, 0.04);
+                color: rgba(242, 244, 248, 0.72);
+                font: 600 0.65rem/1 "Syne", sans-serif;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                text-decoration: none;
+                backdrop-filter: blur(10px);
+                transition:
+                    color 0.25s ease,
+                    background 0.25s ease,
+                    border-color 0.25s ease,
+                    box-shadow 0.25s ease,
+                    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .beta-chip > * {
+                position: relative;
+                z-index: 2;
+            }
+
+            .beta-chip svg {
+                width: 0.85rem;
+                height: 0.85rem;
+                fill: none;
+                stroke: currentColor;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                stroke-width: 1.7;
+                transform-origin: 50% 65%;
+                transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .beta-chip::before {
+                content: "";
+                position: absolute;
+                inset: 0;
+                z-index: 0;
+                pointer-events: none;
+                opacity: 0;
+                transform: translateY(80%) scale(0.75);
+                background: radial-gradient(
+                    ellipse at 38% 100%,
+                    rgba(105, 255, 171, 0.3),
+                    rgba(65, 190, 125, 0.12) 48%,
+                    transparent 72%
+                );
+            }
+
+            .beta-chip::after {
+                content: "";
+                position: absolute;
+                inset: -7px;
+                z-index: 1;
+                pointer-events: none;
+                opacity: 0;
+                transform: translateX(-180%) skewX(-18deg);
+                background: linear-gradient(
+                    90deg,
+                    transparent 32%,
+                    rgba(235, 255, 242, 0.55) 50%,
+                    transparent 68%
+                );
+                filter: blur(3px);
+            }
+
+            .beta-chip:hover,
+            .beta-chip:focus-visible {
+                color: rgba(242, 244, 248, 0.95);
+                background: rgba(242, 244, 248, 0.09);
+                border-color: rgba(242, 244, 248, 0.4);
+                box-shadow:
+                    0 0 0 1px rgba(242, 244, 248, 0.08),
+                    0 8px 24px rgba(0, 0, 0, 0.5);
+                outline: none;
+                transform: translateY(-2px);
+            }
+
+            .beta-chip:hover svg,
+            .beta-chip:focus-visible svg {
+                animation: beta-flask 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .beta-chip:hover::before,
+            .beta-chip:focus-visible::before {
+                animation: beta-bloom 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .beta-chip:hover::after,
+            .beta-chip:focus-visible::after {
+                animation: beta-sheen 0.7s 0.08s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+
+            .beta-chip:active {
+                transform: translateY(0) scale(0.96);
+            }
+
+            @keyframes beta-flask {
+                0% {
+                    transform: rotate(0) scale(1);
+                }
+                38% {
+                    transform: rotate(-10deg) scale(1.12);
+                }
+                68% {
+                    transform: rotate(6deg) scale(1.08);
+                }
+                100% {
+                    transform: rotate(0) scale(1);
+                }
+            }
+
+            @keyframes beta-bloom {
+                0% {
+                    transform: translateY(80%) scale(0.75);
+                    opacity: 0;
+                }
+                45% {
+                    opacity: 0.9;
+                }
+                100% {
+                    transform: translateY(-10%) scale(1.2);
+                    opacity: 0;
+                }
+            }
+
+            @keyframes beta-sheen {
+                0% {
+                    transform: translateX(-180%) skewX(-18deg);
+                    opacity: 0;
+                }
+                28% {
+                    opacity: 0.8;
+                }
+                100% {
+                    transform: translateX(180%) skewX(-18deg);
+                    opacity: 0;
+                }
+            }
+
+            @media (prefers-reduced-motion: reduce) {
+                .beta-chip,
+                .beta-chip svg,
+                .beta-chip::before,
+                .beta-chip::after {
+                    animation: none !important;
+                    transition-duration: 0.01ms;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="site-controls">
+            <a
+                class="beta-chip"
+                href="index.html"
+                aria-label="Open the new portfolio"
+                title="new portfolio"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9 3h6M10 3v5l-5.5 9.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-3.5L14 8V3"></path>
+                    <path d="M7.5 15h9"></path>
+                </svg>
+                new
+            </a>
+            <button
+                class="theme-toggle"
+                id="theme-toggle"
+                type="button"
+                aria-label="Switch to light mode"
+                title="Switch to light mode"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="3.5"></circle>
+                    <path d="M12 2.5v2M12 19.5v2M4.58 4.58l1.42 1.42M18 18l1.42 1.42M2.5 12h2M19.5 12h2M4.58 19.42L6 18M18 6l1.42-1.42"></path>
+                </svg>
+            </button>
+        </div>
+        <main class="page">
+            <section class="hero" aria-label="timuzkas fluid hero">
+                <canvas id="c"></canvas>
+                <div class="below-title">
+                    <div class="intro">
+                        <p class="subtitle" id="subtitle"></p>
+                        <nav class="socials" aria-label="Social links"></nav>
+                    </div>
+                    <aside class="deck" aria-label="Project deck">
+                        <div class="deck-meta">
+                            <span>projects</span>
+                            <span id="deck-count">01 / 01</span>
+                        </div>
+                        <article class="project-card active" id="project-card">
+                            <span
+                                class="project-corner project-corner-top"
+                                aria-hidden="true"
+                            ></span>
+                            <span
+                                class="project-corner project-corner-bottom"
+                                aria-hidden="true"
+                            ></span>
+                            <div
+                                class="project-tech-list"
+                                id="project-tech-list"
+                                aria-hidden="true"
+                            ></div>
+                            <div class="project-inner">
+                                <div>
+                                    <h2
+                                        class="project-title"
+                                        id="project-title"
+                                    ></h2>
+                                </div>
+                                <div>
+                                    <p
+                                        class="project-desc"
+                                        id="project-desc"
+                                    ></p>
+                                </div>
+                            </div>
+                        </article>
+                    </aside>
+                </div>
+            </section>
+            <footer class="footer">
+                <a
+                    class="footer-link"
+                    href="simple.html"
+                    aria-label="Open the simpler version of this page"
+                >
+                    <span>timuzkas / 2026 / :&gt;</span>
+                </a>
+            </footer>
+        </main>
+
+        <script>
+            const themeToggle = document.getElementById("theme-toggle");
+            themeToggle.addEventListener("click", () => {
+                try {
+                    localStorage.setItem("portfolio-theme", "light");
+                } catch {}
+                window.location.href = "old.html?theme=light";
+            });
+
+            const canvas = document.getElementById("c");
+            const ctx = canvas.getContext("2d");
+            const text = "timuzkas";
+            const projects = PORTFOLIO.projects;
+
+            const pointer = {
+                x: 0,
+                y: 0,
+                px: 0,
+                py: 0,
+                active: false,
+                down: false,
+            };
+
+            let w = 0;
+            let h = 0;
+            let dpr = Math.min(window.devicePixelRatio || 1, 2);
+            let cols = 150;
+            let rows = 90;
+            let size = 0;
+            let lastTime = 0;
+            let scrollKick = 0;
+            let activeProject = 0;
+            let lastDeckSwitch = 0;
+            const cardDrag = {
+                active: false,
+                startX: 0,
+                startY: 0,
+                x: 0,
+                y: 0,
+                moved: false,
+            };
+
+            let u;
+            let v;
+            let u0;
+            let v0;
+            let density;
+            let density0;
+            let source;
+            let pressure;
+            let divergence;
+
+            const sourceCanvas = document.createElement("canvas");
+            const sourceCtx = sourceCanvas.getContext("2d");
+            const simCanvas = document.createElement("canvas");
+            const simCtx = simCanvas.getContext("2d");
+            const subtitle = document.getElementById("subtitle");
+            subtitle.textContent = PORTFOLIO.bio.subtitle;
+            document.querySelector(".socials").innerHTML = PORTFOLIO.socials
+                .map(
+                    (social) => `<a
+                        class="social-link"
+                        href="${social.url}"
+                        ${social.external ? 'target="_blank" rel="noopener"' : ""}
+                        style="--card-a: ${social.colors[0]}; --card-b: ${social.colors[1]};"
+                        ><span>${social.label}</span><span>-&gt;</span></a>`,
+                )
+                .join("");
+            const deckCount = document.getElementById("deck-count");
+            const projectCard = document.getElementById("project-card");
+            const projectCornerTop = document.querySelector(
+                ".project-corner-top",
+            );
+            const projectCornerBottom = document.querySelector(
+                ".project-corner-bottom",
+            );
+            const projectTitle = document.getElementById("project-title");
+            const projectTechList =
+                document.getElementById("project-tech-list");
+            const projectDesc = document.getElementById("project-desc");
+            const socialLinks = document.querySelectorAll(".social-link");
+            const footerText = document.querySelector(".footer span");
+            const footerLink = document.querySelector(".footer-link");
+            let simImage;
+
+            const subtitleEggs = [
+                {
+                    pattern: /\bfullstack\b/g,
+                    egg: "mainly web stuff, c++, go, lua",
+                },
+                {
+                    pattern: /\bmusician\b/g,
+                    egg: "i even have a degree :>",
+                },
+                { pattern: /\bartist\b/g, egg: "i draw stuff!" },
+                {
+                    pattern: /smooth animations/g,
+                    egg: "cant live without good ux",
+                },
+                {
+                    pattern: /Open for work\./g,
+                    egg: "available for freelance and part-time",
+                },
+            ];
+
+            function escapeHtml(text) {
+                return text
+                    .replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;")
+                    .replaceAll(">", "&gt;");
+            }
+
+            function decorateSubtitle() {
+                const raw = subtitle.textContent;
+                let html = escapeHtml(raw);
+
+                subtitleEggs.forEach(({ pattern, egg }) => {
+                    html = html.replace(
+                        pattern,
+                        (match) =>
+                            `<span class="subtitle-egg" data-egg="${egg}">${match}</span>`,
+                    );
+                });
+
+                subtitle.innerHTML = html;
+            }
+
+            function index(x, y) {
+                return x + y * cols;
+            }
+
+            function resize() {
+                dpr = Math.min(window.devicePixelRatio || 1, 2);
+                w = window.innerWidth;
+                h = window.innerHeight;
+                canvas.width = Math.floor(w * dpr);
+                canvas.height = Math.floor(h * dpr);
+                canvas.style.width = `${w}px`;
+                canvas.style.height = `${h}px`;
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+                cols = Math.max(160, Math.min(340, Math.round(w / 4.5)));
+                rows = Math.max(100, Math.min(220, Math.round((cols * h) / w)));
+                size = cols * rows;
+
+                sourceCanvas.width = cols;
+                sourceCanvas.height = rows;
+                simCanvas.width = cols;
+                simCanvas.height = rows;
+                simImage = simCtx.createImageData(cols, rows);
+
+                u = new Float32Array(size);
+                v = new Float32Array(size);
+                u0 = new Float32Array(size);
+                v0 = new Float32Array(size);
+                density = new Float32Array(size);
+                density0 = new Float32Array(size);
+                source = new Float32Array(size);
+                pressure = new Float32Array(size);
+                divergence = new Float32Array(size);
+
+                makeTextSource();
+                density.set(source);
+            }
+
+            function makeTextSource() {
+                source.fill(0);
+                sourceCtx.clearRect(0, 0, cols, rows);
+                sourceCtx.fillStyle = "#000";
+                sourceCtx.fillRect(0, 0, cols, rows);
+
+                let fontSize = Math.min(cols * 0.18, rows * 0.34);
+                sourceCtx.textBaseline = "alphabetic";
+                sourceCtx.textAlign = "center";
+
+                do {
+                    sourceCtx.font = `900 ${fontSize}px Arial Black, Trebuchet MS, Verdana, sans-serif`;
+                    fontSize -=
+                        sourceCtx.measureText(text).width > cols * 0.72 ? 1 : 0;
+                } while (
+                    sourceCtx.measureText(text).width > cols * 0.72 &&
+                    fontSize > 20
+                );
+
+                sourceCtx.font = `900 ${fontSize}px Arial Black, Trebuchet MS, Verdana, sans-serif`;
+                const measured = sourceCtx.measureText(text);
+                const textLeftPx =
+                    ((cols * 0.5 - measured.width * 0.5) / cols) * w;
+                const textBottomPx =
+                    ((rows * 0.52 + fontSize * 0.76) / rows) * h;
+                const textWidthPx = (measured.width / cols) * w;
+                document.documentElement.style.setProperty(
+                    "--text-left",
+                    `${Math.max(24, textLeftPx)}px`,
+                );
+                document.documentElement.style.setProperty(
+                    "--text-bottom",
+                    `${textBottomPx}px`,
+                );
+                document.documentElement.style.setProperty(
+                    "--text-width",
+                    `${textWidthPx}px`,
+                );
+
+                sourceCtx.lineJoin = "round";
+                sourceCtx.lineCap = "round";
+                sourceCtx.lineWidth = Math.max(1.5, fontSize * 0.045);
+                sourceCtx.strokeStyle = "#fff";
+                sourceCtx.fillStyle = "#fff";
+                sourceCtx.strokeText(
+                    text,
+                    cols * 0.5,
+                    rows * 0.52 + fontSize * 0.35,
+                );
+                sourceCtx.fillText(
+                    text,
+                    cols * 0.5,
+                    rows * 0.52 + fontSize * 0.35,
+                );
+
+                const pixels = sourceCtx.getImageData(0, 0, cols, rows).data;
+                for (let i = 0; i < size; i++) {
+                    source[i] = pixels[i * 4] / 255;
+                }
+            }
+
+            function addSource(dt, time) {
+                const restore = 0.085 + 0.015 * Math.sin(time * 0.00025);
+                for (let i = 0; i < size; i++) {
+                    const outsideFade = source[i] > 0.02 ? 0.9998 : 0.982;
+                    density[i] =
+                        density[i] * outsideFade +
+                        (source[i] - density[i]) * source[i] * restore;
+                }
+
+                const cx = cols * 0.5;
+                const cy = rows * 0.52;
+                for (let y = 1; y < rows - 1; y++) {
+                    for (let x = 1; x < cols - 1; x++) {
+                        const i = index(x, y);
+                        if (source[i] <= 0.02) continue;
+
+                        const swirl =
+                            Math.sin(time * 0.00016 + x * 0.07 + y * 0.05) *
+                            0.00045;
+                        u[i] +=
+                            (-(y - cy) * swirl + scrollKick * 0.00008) *
+                            dt *
+                            60;
+                        v[i] += (x - cx) * swirl * dt * 60;
+                    }
+                }
+            }
+
+            function injectPointer() {
+                if (!pointer.active && Math.abs(scrollKick) < 0.01) return;
+
+                const gx = (pointer.x / Math.max(1, w)) * cols;
+                const gy = (pointer.y / Math.max(1, h)) * rows;
+                const dx = Math.max(
+                    -1.2,
+                    Math.min(
+                        1.2,
+                        ((pointer.x - pointer.px) / Math.max(1, w)) * cols,
+                    ),
+                );
+                const dy = Math.max(
+                    -1.2,
+                    Math.min(
+                        1.2,
+                        ((pointer.y - pointer.py) / Math.max(1, h)) * rows,
+                    ),
+                );
+                const radius = pointer.down ? 9 : 7;
+                const strength = pointer.down ? 0.7 : 0.38;
+
+                for (
+                    let y = Math.max(1, Math.floor(gy - radius));
+                    y < Math.min(rows - 1, gy + radius);
+                    y++
+                ) {
+                    for (
+                        let x = Math.max(1, Math.floor(gx - radius));
+                        x < Math.min(cols - 1, gx + radius);
+                        x++
+                    ) {
+                        const rx = x - gx;
+                        const ry = y - gy;
+                        const d = Math.sqrt(rx * rx + ry * ry);
+                        if (d > radius) continue;
+
+                        const falloff = (1 - d / radius) ** 2;
+                        const i = index(x, y);
+                        u[i] +=
+                            dx * strength * falloff +
+                            (-ry / radius) * falloff * 0.08;
+                        v[i] +=
+                            dy * strength * falloff +
+                            (rx / radius) * falloff * 0.08;
+                        density[i] = Math.min(
+                            1.4,
+                            density[i] + falloff * 0.025,
+                        );
+                    }
+                }
+
+                if (Math.abs(scrollKick) > 0.01) {
+                    for (let y = 1; y < rows - 1; y++) {
+                        for (let x = 1; x < cols - 1; x++) {
+                            const i = index(x, y);
+                            const amount = source[i] + density[i] * 0.08;
+                            u[i] +=
+                                Math.sin(y * 0.17) *
+                                scrollKick *
+                                amount *
+                                0.0008;
+                            v[i] += scrollKick * amount * 0.0012;
+                        }
+                    }
+                }
+            }
+
+            function advect(target, src, velX, velY, dt, decay) {
+                const dtX = dt * cols;
+                const dtY = dt * rows;
+
+                for (let y = 1; y < rows - 1; y++) {
+                    for (let x = 1; x < cols - 1; x++) {
+                        const i = index(x, y);
+                        let px = x - velX[i] * dtX;
+                        let py = y - velY[i] * dtY;
+
+                        px = Math.max(0.5, Math.min(cols - 1.5, px));
+                        py = Math.max(0.5, Math.min(rows - 1.5, py));
+
+                        const x0 = Math.floor(px);
+                        const y0 = Math.floor(py);
+                        const x1 = x0 + 1;
+                        const y1 = y0 + 1;
+                        const sx = px - x0;
+                        const sy = py - y0;
+
+                        const a =
+                            src[index(x0, y0)] * (1 - sx) +
+                            src[index(x1, y0)] * sx;
+                        const b =
+                            src[index(x0, y1)] * (1 - sx) +
+                            src[index(x1, y1)] * sx;
+                        target[i] = (a * (1 - sy) + b * sy) * decay;
+                    }
+                }
+
+                setBounds(target, 0);
+            }
+
+            function setBounds(field, mode) {
+                for (let x = 1; x < cols - 1; x++) {
+                    field[index(x, 0)] =
+                        mode === 2 ? -field[index(x, 1)] : field[index(x, 1)];
+                    field[index(x, rows - 1)] =
+                        mode === 2
+                            ? -field[index(x, rows - 2)]
+                            : field[index(x, rows - 2)];
+                }
+
+                for (let y = 1; y < rows - 1; y++) {
+                    field[index(0, y)] =
+                        mode === 1 ? -field[index(1, y)] : field[index(1, y)];
+                    field[index(cols - 1, y)] =
+                        mode === 1
+                            ? -field[index(cols - 2, y)]
+                            : field[index(cols - 2, y)];
+                }
+
+                field[index(0, 0)] =
+                    0.5 * (field[index(1, 0)] + field[index(0, 1)]);
+                field[index(cols - 1, 0)] =
+                    0.5 *
+                    (field[index(cols - 2, 0)] + field[index(cols - 1, 1)]);
+                field[index(0, rows - 1)] =
+                    0.5 *
+                    (field[index(1, rows - 1)] + field[index(0, rows - 2)]);
+                field[index(cols - 1, rows - 1)] =
+                    0.5 *
+                    (field[index(cols - 2, rows - 1)] +
+                        field[index(cols - 1, rows - 2)]);
+            }
+
+            function project() {
+                for (let y = 1; y < rows - 1; y++) {
+                    for (let x = 1; x < cols - 1; x++) {
+                        const i = index(x, y);
+                        divergence[i] =
+                            -0.5 *
+                            ((u[index(x + 1, y)] - u[index(x - 1, y)]) / cols +
+                                (v[index(x, y + 1)] - v[index(x, y - 1)]) /
+                                    rows);
+                        pressure[i] = 0;
+                    }
+                }
+
+                setBounds(divergence, 0);
+                setBounds(pressure, 0);
+
+                for (let k = 0; k < 18; k++) {
+                    for (let y = 1; y < rows - 1; y++) {
+                        for (let x = 1; x < cols - 1; x++) {
+                            pressure[index(x, y)] =
+                                (divergence[index(x, y)] +
+                                    pressure[index(x - 1, y)] +
+                                    pressure[index(x + 1, y)] +
+                                    pressure[index(x, y - 1)] +
+                                    pressure[index(x, y + 1)]) *
+                                0.25;
+                        }
+                    }
+                    setBounds(pressure, 0);
+                }
+
+                for (let y = 1; y < rows - 1; y++) {
+                    for (let x = 1; x < cols - 1; x++) {
+                        const i = index(x, y);
+                        u[i] -=
+                            0.5 *
+                            cols *
+                            (pressure[index(x + 1, y)] -
+                                pressure[index(x - 1, y)]);
+                        v[i] -=
+                            0.5 *
+                            rows *
+                            (pressure[index(x, y + 1)] -
+                                pressure[index(x, y - 1)]);
+                    }
+                }
+
+                setBounds(u, 1);
+                setBounds(v, 2);
+            }
+
+            function step(dt, time) {
+                addSource(dt, time);
+                injectPointer();
+
+                u0.set(u);
+                v0.set(v);
+                advect(u, u0, u0, v0, dt, 0.94);
+                advect(v, v0, u0, v0, dt, 0.94);
+                project();
+
+                density0.set(density);
+                advect(density, density0, u, v, dt, 0.9996);
+
+                scrollKick *= 0.82;
+            }
+
+            function renderFluid(time) {
+                const data = simImage.data;
+                const shift = (time * 0.018) % 360;
+
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        const i = index(x, y);
+                        const raw = Math.max(0, Math.min(1, density[i]));
+                        const d =
+                            raw < 0.11
+                                ? 0
+                                : Math.min(
+                                      1,
+                                      Math.pow((raw - 0.11) / 0.89, 0.55),
+                                  );
+                        const speed = Math.min(1, Math.hypot(u[i], v[i]) * 2.5);
+                        const hue =
+                            (shift + x * 1.8 + y * 2.6 + speed * 90) % 360;
+                        const alpha = Math.min(255, d * 255);
+                        const light = 46 + d * 27 + speed * 10;
+                        const chroma = 0.78 + d * 0.22;
+                        const rgb = hslToRgb(hue, chroma, light / 100);
+                        const p = i * 4;
+
+                        data[p] = rgb[0];
+                        data[p + 1] = rgb[1];
+                        data[p + 2] = rgb[2];
+                        data[p + 3] = alpha;
+                    }
+                }
+
+                simCtx.putImageData(simImage, 0, 0);
+
+                ctx.clearRect(0, 0, w, h);
+                ctx.fillStyle = "#090b10";
+                ctx.fillRect(0, 0, w, h);
+                ctx.imageSmoothingEnabled = false;
+                ctx.drawImage(simCanvas, 0, 0, w, h);
+            }
+
+            function hslToRgb(h, s, l) {
+                const c = (1 - Math.abs(2 * l - 1)) * s;
+                const hp = h / 60;
+                const x = c * (1 - Math.abs((hp % 2) - 1));
+                let r = 0;
+                let g = 0;
+                let b = 0;
+
+                if (hp < 1) [r, g, b] = [c, x, 0];
+                else if (hp < 2) [r, g, b] = [x, c, 0];
+                else if (hp < 3) [r, g, b] = [0, c, x];
+                else if (hp < 4) [r, g, b] = [0, x, c];
+                else if (hp < 5) [r, g, b] = [x, 0, c];
+                else [r, g, b] = [c, 0, x];
+
+                const m = l - c / 2;
+                return [
+                    Math.round((r + m) * 255),
+                    Math.round((g + m) * 255),
+                    Math.round((b + m) * 255),
+                ];
+            }
+
+            function render(time) {
+                if (!lastTime) lastTime = time;
+                const dt = Math.min(0.033, (time - lastTime) / 1000);
+                lastTime = time;
+
+                step(dt, time);
+                renderFluid(time);
+                requestAnimationFrame(render);
+            }
+
+            function splitLongWord(word) {
+                const candidates = [];
+
+                for (let index = 1; index < word.length; index += 1) {
+                    const prev = word[index - 1];
+                    const curr = word[index];
+                    const isHyphenBreak = prev === "-" || prev === "_";
+                    const isCamelBreak =
+                        /[a-z]/.test(prev) && /[A-Z]/.test(curr);
+                    const isDigitLetterBreak =
+                        (/\d/.test(prev) && /[A-Za-z]/.test(curr)) ||
+                        (/[A-Za-z]/.test(prev) && /\d/.test(curr));
+
+                    if (isHyphenBreak || isCamelBreak || isDigitLetterBreak) {
+                        candidates.push(index);
+                    }
+                }
+
+                if (!candidates.length) {
+                    candidates.push(Math.ceil(word.length / 2));
+                }
+
+                let bestIndex = candidates[0];
+                let bestScore = Number.POSITIVE_INFINITY;
+
+                for (const index of candidates) {
+                    const left = word.slice(0, index);
+                    const right = word.slice(index);
+                    const balanceScore = Math.abs(left.length - right.length);
+                    const shortPenalty =
+                        Math.min(left.length, right.length) < 3 ? 3 : 0;
+                    const boundaryBonus =
+                        word[index - 1] === "-" || word[index - 1] === "_"
+                            ? -2
+                            : 0;
+                    const score = balanceScore + shortPenalty + boundaryBonus;
+
+                    if (score < bestScore) {
+                        bestScore = score;
+                        bestIndex = index;
+                    }
+                }
+
+                let left = word.slice(0, bestIndex);
+                let right = word.slice(bestIndex);
+
+                if (left.endsWith("-") || left.endsWith("_")) {
+                    left = left.slice(0, -1);
+                }
+                if (right.startsWith("-") || right.startsWith("_")) {
+                    right = right.slice(1);
+                }
+
+                return [left, right].filter(Boolean);
+            }
+
+            function splitTitleIntoLines(title) {
+                const words = title.split(/\s+/).filter(Boolean);
+                if (words.length <= 1) {
+                    const word = words[0] || "";
+                    if (word.length <= 7) return [words, []];
+                    return [splitLongWord(word), []];
+                }
+
+                let bestIndex = 1;
+                let bestScore = Number.POSITIVE_INFINITY;
+
+                for (let index = 1; index < words.length; index += 1) {
+                    const firstLine = words.slice(0, index).join(" ");
+                    const secondLine = words.slice(index).join(" ");
+                    const balanceScore = Math.abs(
+                        firstLine.length - secondLine.length,
+                    );
+                    const isolationPenalty =
+                        Math.min(firstLine.length, secondLine.length) < 4
+                            ? 6
+                            : 0;
+                    const score = balanceScore + isolationPenalty;
+
+                    if (score < bestScore) {
+                        bestScore = score;
+                        bestIndex = index;
+                    }
+                }
+
+                return [words.slice(0, bestIndex), words.slice(bestIndex)];
+            }
+
+            function buildTitleMarkup(title) {
+                const [lineOne, lineTwo] = splitTitleIntoLines(title);
+                const lines = [lineOne, lineTwo].filter((line) => line.length);
+                const jumpPatterns = [
+                    { x: "-7px", y: "-8px", rot: "-5deg" },
+                    { x: "5px", y: "-11px", rot: "4deg" },
+                    { x: "-4px", y: "-6px", rot: "3deg" },
+                    { x: "8px", y: "-9px", rot: "-4deg" },
+                ];
+
+                return lines
+                    .map((line, lineIndex) => {
+                        const words = line
+                            .map((word, wordIndex) => {
+                                const pattern =
+                                    jumpPatterns[
+                                        (lineIndex * 2 + wordIndex) %
+                                            jumpPatterns.length
+                                    ];
+
+                                return `<span class="project-title-word" style="--jump-x: ${pattern.x}; --jump-y: ${pattern.y}; --jump-rot: ${pattern.rot};">${word}</span>`;
+                            })
+                            .join("");
+
+                        const lineClass = line.length > 1 ? " line-split" : "";
+                        return `<span class="project-title-line line-${lineIndex + 1}${lineClass}">${words}</span>`;
+                    })
+                    .join("");
+            }
+
+            function buildTechMarkup(tech = []) {
+                return tech
+                    .map((item, index) => {
+                        const glow = [
+                            "rgba(0, 226, 255, 0.16)",
+                            "rgba(255, 54, 208, 0.14)",
+                            "rgba(173, 255, 47, 0.12)",
+                            "rgba(255, 180, 0, 0.14)",
+                        ][index % 4];
+                        return `<span class="project-tech-chip" style="--chip-glow: ${glow};">${item}</span>`;
+                    })
+                    .join("");
+            }
+
+            function fitTitleSize(title) {
+                const [lineOne, lineTwo] = splitTitleIntoLines(title);
+                const lines = [lineOne.join(" "), lineTwo.join(" ")].filter(
+                    Boolean,
+                );
+                const rect = projectCard.getBoundingClientRect();
+                const rootFontSize =
+                    parseFloat(
+                        getComputedStyle(document.documentElement).fontSize,
+                    ) || 16;
+                const maxWidth = Math.max(180, rect.width * 0.76);
+                const maxHeight = Math.max(90, rect.height * 0.33);
+                let low = 22;
+                let high = 52;
+                let best = 32;
+
+                while (high - low > 0.5) {
+                    const size = (low + high) / 2;
+                    sourceCtx.font = `400 ${size}px Chango, Arial Black, system-ui, sans-serif`;
+                    const widest = lines.reduce((max, line) => {
+                        return Math.max(max, sourceCtx.measureText(line).width);
+                    }, 0);
+                    const lineHeight = size * 0.9;
+                    const totalHeight =
+                        lines.length * lineHeight +
+                        Math.max(0, lines.length - 1) * size * 0.02;
+
+                    if (widest <= maxWidth && totalHeight <= maxHeight) {
+                        best = size;
+                        low = size;
+                    } else {
+                        high = size;
+                    }
+                }
+
+                return Math.max(2, Math.min(3.2, best / rootFontSize));
+            }
+
+            function renderProject() {
+                const project = projects[activeProject];
+                const titleSize = fitTitleSize(project.title);
+                projectCard.style.setProperty("--card-a", project.colors[0]);
+                projectCard.style.setProperty("--card-b", project.colors[1]);
+                projectCard.style.setProperty(
+                    "--title-size",
+                    `${titleSize}rem`,
+                );
+                projectCard.dataset.index = String(activeProject + 1).padStart(
+                    2,
+                    "0",
+                );
+                projectCornerTop.textContent = projectCard.dataset.index;
+                projectCornerBottom.textContent = projectCard.dataset.index;
+                projectCard.setAttribute("role", "link");
+                projectCard.setAttribute("tabindex", "0");
+                projectCard.setAttribute(
+                    "aria-label",
+                    project.priv
+                        ? `Private project ${project.title}`
+                        : `Open ${project.title} in a new tab`,
+                );
+                deckCount.textContent = `${String(activeProject + 1).padStart(2, "0")} / ${String(projects.length).padStart(2, "0")}`;
+                projectTitle.innerHTML = buildTitleMarkup(project.title);
+                projectTechList.innerHTML = buildTechMarkup(project.tech);
+                projectDesc.textContent = project.description;
+            }
+
+            function switchProject(direction, options = {}) {
+                const { animateExit = true } = options;
+                const card = projectCard;
+
+                const exitAnimation = animateExit
+                    ? card.animate(
+                          [
+                              {
+                                  transform: `translate3d(${cardDrag.x}px, ${cardDrag.y}px,0) rotateZ(${cardDrag.x * 0.05}deg)`,
+                                  opacity: 1,
+                              },
+                              {
+                                  transform: `translate3d(${direction * -220}px,-20px,0) rotateZ(${direction * -18}deg)`,
+                                  opacity: 0,
+                              },
+                          ],
+                          {
+                              duration: 260,
+                              easing: "cubic-bezier(0.16,1,0.3,1)",
+                              fill: "forwards",
+                          },
+                      ).finished
+                    : Promise.resolve();
+
+                exitAnimation.then(() => {
+                    card.style.opacity = "0";
+                    activeProject =
+                        (activeProject + direction + projects.length) %
+                        projects.length;
+
+                    renderProject();
+
+                    card.getAnimations().forEach((anim) => anim.cancel());
+
+                    requestAnimationFrame(() => {
+                        const incomingAnim = card.animate(
+                            [
+                                {
+                                    transform: `translate3d(${direction * 120}px,20px,0) scale(.92)`,
+                                    opacity: 0,
+                                },
+                                {
+                                    transform: "translate3d(0,0,0) scale(1)",
+                                    opacity: 1,
+                                },
+                            ],
+                            {
+                                duration: 400,
+                                easing: "cubic-bezier(0.16,1,0.3,1)",
+                            },
+                        );
+
+                        incomingAnim.finished.then(() => {
+                            incomingAnim.cancel();
+                            card.style.opacity = "";
+                        });
+                    });
+
+                    resetCardDrag();
+                });
+            }
+
+            function setCardDrag(x, y) {
+                cardDrag.x = x;
+                cardDrag.y = y;
+                projectCard.style.setProperty("--drag-x", `${x}px`);
+                projectCard.style.setProperty("--drag-y", `${y}px`);
+                projectCard.style.setProperty("--drag-rot", `${x * 0.05}deg`);
+            }
+
+            function resetCardDrag() {
+                projectCard.classList.remove("is-dragging");
+                setCardDrag(0, 0);
+                cardDrag.moved = false;
+            }
+
+            function openActiveProject() {
+                if (projectCard.classList.contains("is-opening")) return;
+
+                const project = projects[activeProject];
+                if (project.priv) return;
+                const targetUrl = project.url || "#";
+                projectCard.classList.add("is-opening");
+                projectCard
+                    .animate(
+                        [
+                            {
+                                transform:
+                                    "translate3d(0, 0, 0) rotateY(0deg) rotateX(0deg) scale(1)",
+                                filter: "brightness(1)",
+                                opacity: 1,
+                            },
+                            {
+                                transform:
+                                    "translate3d(0, -14px, 0) rotateY(-180deg) rotateX(7deg) scale(1.04)",
+                                filter: "brightness(1.1)",
+                                opacity: 0.96,
+                            },
+                            {
+                                transform:
+                                    "translate3d(0, 0, 0) rotateY(-360deg) rotateX(0deg) scale(1)",
+                                filter: "brightness(1)",
+                                opacity: 1,
+                            },
+                        ],
+                        {
+                            duration: 760,
+                            easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+                        },
+                    )
+                    .finished.then(() => {
+                        const openedWindow = window.open(targetUrl, "_blank");
+                        if (openedWindow) {
+                            openedWindow.opener = null;
+                            openedWindow.blur();
+                            window.focus();
+                        }
+                        projectCard.classList.remove("is-opening");
+                        setCardDrag(0, 0);
+                    });
+            }
+
+            projectCard.addEventListener("pointerdown", (event) => {
+                cardDrag.active = true;
+                cardDrag.startX = event.clientX;
+                cardDrag.startY = event.clientY;
+                cardDrag.moved = false;
+                projectCard.classList.add("is-dragging");
+                projectCard.setPointerCapture(event.pointerId);
+            });
+
+            projectCard.addEventListener("pointermove", (event) => {
+                const rect = projectCard.getBoundingClientRect();
+                const flowX = ((event.clientX - rect.left) / rect.width) * 100;
+                const flowY = ((event.clientY - rect.top) / rect.height) * 100;
+                projectCard.style.setProperty("--flow-x", `${flowX}%`);
+                projectCard.style.setProperty("--flow-y", `${flowY}%`);
+                projectCard.style.setProperty(
+                    "--title-nudge-x",
+                    `${((flowX - 50) / 50) * 4}px`,
+                );
+                projectCard.style.setProperty(
+                    "--title-nudge-y",
+                    `${((flowY - 50) / 50) * 2}px`,
+                );
+                projectCard.style.setProperty(
+                    "--title-tilt",
+                    `${((flowX - 50) / 50) * 1.8}`,
+                );
+
+                if (!cardDrag.active) return;
+
+                const x = Math.max(
+                    -120,
+                    Math.min(120, event.clientX - cardDrag.startX),
+                );
+                const y = Math.max(
+                    -36,
+                    Math.min(36, event.clientY - cardDrag.startY),
+                );
+                cardDrag.moved = Math.hypot(x, y) > 8;
+                setCardDrag(x, y);
+            });
+
+            projectCard.addEventListener("pointerleave", () => {
+                projectCard.style.setProperty("--flow-x", "50%");
+                projectCard.style.setProperty("--flow-y", "45%");
+                projectCard.style.setProperty("--title-nudge-x", "0px");
+                projectCard.style.setProperty("--title-nudge-y", "0px");
+                projectCard.style.setProperty("--title-tilt", "0");
+            });
+
+            projectCard.addEventListener("pointerup", (event) => {
+                if (!cardDrag.active) return;
+
+                cardDrag.active = false;
+                projectCard.releasePointerCapture(event.pointerId);
+
+                if (Math.abs(cardDrag.x) > 58) {
+                    const direction = cardDrag.x < 0 ? 1 : -1;
+                    projectCard
+                        .animate(
+                            [
+                                {
+                                    transform: `translate3d(${cardDrag.x}px, ${cardDrag.y}px, 0) rotateZ(${cardDrag.x * 0.05}deg)`,
+                                    opacity: 1,
+                                },
+                                {
+                                    transform: `translate3d(${direction * -220}px, ${cardDrag.y - 22}px, 0) rotateZ(${direction * -18}deg)`,
+                                    opacity: 0,
+                                },
+                            ],
+                            {
+                                duration: 260,
+                                easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+                                fill: "forwards",
+                            },
+                        )
+                        .finished.then(() => {
+                            switchProject(direction, { animateExit: false });
+                        });
+                } else if (!cardDrag.moved) {
+                    resetCardDrag();
+                    openActiveProject();
+                } else {
+                    resetCardDrag();
+                }
+            });
+
+            projectCard.addEventListener("pointercancel", resetCardDrag);
+
+            projectCard.addEventListener("keydown", (event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                event.preventDefault();
+                openActiveProject();
+            });
+
+            socialLinks.forEach((link) => {
+                link.addEventListener("pointermove", (event) => {
+                    const rect = link.getBoundingClientRect();
+                    const x = ((event.clientX - rect.left) / rect.width) * 100;
+                    const y = ((event.clientY - rect.top) / rect.height) * 100;
+                    link.style.setProperty("--mx", `${x}%`);
+                    link.style.setProperty("--my", `${y}%`);
+                });
+
+                link.addEventListener("pointerleave", () => {
+                    link.style.setProperty("--mx", "50%");
+                    link.style.setProperty("--my", "50%");
+                });
+            });
+
+            if (footerText) {
+                footerText.innerHTML = [...footerText.textContent]
+                    .map(
+                        (char) =>
+                            `<span class="footer-letter">${char === " " ? "&nbsp;" : char}</span>`,
+                    )
+                    .join("");
+
+                const footerLetters =
+                    footerText.querySelectorAll(".footer-letter");
+                const resetFooterDecor = () => {
+                    footerLetters.forEach((letter) => {
+                        letter.style.setProperty("--run-x", "0px");
+                        letter.style.setProperty("--run-y", "0px");
+                        letter.style.setProperty("--run-rot", "0deg");
+                    });
+                    footerLink.style.setProperty("--tip-x", "0px");
+                    footerLink.style.setProperty("--tip-rot", "0deg");
+                };
+
+                footerText.addEventListener("pointermove", (event) => {
+                    const linkRect = footerLink.getBoundingClientRect();
+                    const nx =
+                        (event.clientX - linkRect.left) / linkRect.width -
+                        0.5;
+                    footerLink.style.setProperty(
+                        "--tip-x",
+                        `${(nx * 14).toFixed(2)}px`,
+                    );
+                    footerLink.style.setProperty(
+                        "--tip-rot",
+                        `${(nx * -6).toFixed(2)}deg`,
+                    );
+
+                    footerLetters.forEach((letter, index) => {
+                        const rect = letter.getBoundingClientRect();
+                        const cx = rect.left + rect.width * 0.5;
+                        const cy = rect.top + rect.height * 0.5;
+                        const dx = cx - event.clientX;
+                        const dy = cy - event.clientY;
+                        const distance = Math.max(1, Math.hypot(dx, dy));
+                        const force = Math.max(0, 1 - distance / 64);
+                        const x = (dx / distance) * force * 8;
+                        const y = (dy / distance) * force * 5;
+                        const rot = ((index % 2 ? 1 : -1) * force * 5).toFixed(
+                            2,
+                        );
+                        letter.style.setProperty(
+                            "--run-x",
+                            `${x.toFixed(2)}px`,
+                        );
+                        letter.style.setProperty(
+                            "--run-y",
+                            `${y.toFixed(2)}px`,
+                        );
+                        letter.style.setProperty("--run-rot", `${rot}deg`);
+                    });
+                });
+
+                footerText.addEventListener("pointerleave", resetFooterDecor);
+            }
+
+            window.addEventListener("pointermove", (event) => {
+                pointer.px = pointer.x || event.clientX;
+                pointer.py = pointer.y || event.clientY;
+                pointer.x = event.clientX;
+                pointer.y = event.clientY;
+                pointer.active = true;
+            });
+
+            window.addEventListener("pointerdown", () => {
+                pointer.down = true;
+            });
+
+            window.addEventListener("pointerup", () => {
+                pointer.down = false;
+            });
+
+            window.addEventListener("pointerleave", () => {
+                pointer.active = false;
+            });
+
+            window.addEventListener(
+                "wheel",
+                (event) => {
+                    scrollKick += Math.max(
+                        -4,
+                        Math.min(4, event.deltaY * 0.006),
+                    );
+                    if (event.deltaY <= 0) return;
+
+                    const atPageEnd =
+                        window.innerHeight + window.scrollY >=
+                        document.documentElement.scrollHeight - 6;
+                    const now = performance.now();
+
+                    if (
+                        atPageEnd &&
+                        event.deltaY > 12 &&
+                        now - lastDeckSwitch > 420
+                    ) {
+                        switchProject(1);
+                        lastDeckSwitch = now;
+                    }
+                },
+                { passive: true },
+            );
+
+            window.addEventListener("resize", resize);
+            decorateSubtitle();
+            renderProject();
+            resize();
+            requestAnimationFrame(render);
+        </script>
+    </body>
+</html>

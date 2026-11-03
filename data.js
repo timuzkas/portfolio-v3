@@ -64,7 +64,7 @@ const PORTFOLIO = {
             url: "https://bin.timuzkas.xyz",
             tech: ["web", "2026"],
             year: "26",
-            images: [],
+            images: ["assets/tbin2.webp",],
             colors: [
                 "rgba(0, 226, 255, 0.22)",
                 "rgba(255, 54, 208, 0.2)",
@@ -76,7 +76,7 @@ const PORTFOLIO = {
             url: "https://l.timuzkas.xyz",
             tech: ["web", "2026"],
             year: "26",
-            images: [],
+            images: ["assets/tlink2.webp",],
             colors: [
                 "rgba(255, 180, 0, 0.24)",
                 "rgba(93, 92, 255, 0.18)",

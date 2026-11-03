@@ -45,13 +45,23 @@ const PORTFOLIO = {
     ],
     projects: [
         {
-            title: "tbin",
-            description: "Fast pastebin + file sharing",
-            url: "https://github.com/timuzkas/tbin",
-            tech: ["web", "2025"],
+            title: "tbin2",
+            description: "Fast pastebin + file sharing and... v2!",
+            url: "https://bin.timuzkas.xyz",
+            tech: ["web", "2026"],
             colors: [
                 "rgba(0, 226, 255, 0.22)",
                 "rgba(255, 54, 208, 0.2)",
+            ],
+        },
+        {
+            title: "tlink2",
+            description: "simple link shortener ( and tracker remover )",
+            url: "https://l.timuzkas.xyz",
+            tech: ["web", "2026"],
+            colors: [
+                "rgba(255, 180, 0, 0.24)",
+                "rgba(93, 92, 255, 0.18)",
             ],
         },
         {
